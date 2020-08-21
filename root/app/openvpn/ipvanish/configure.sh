@@ -1,25 +1,25 @@
 #!/bin/sh
 
 DATE_CURRENT=$(date +%d)
-DATE_UPDATED=$(cat /cache/openvpn/date_updated)
+DATE_UPDATED=$(cat /cache/openvpn/ipvanish/date_updated)
 
 if [ "$DATE_CURRENT" != "$DATE_UPDATED" ]; then
 
     echo "Updating vpn config" >> /var/log/healthcheck.log
 
-    rm -rf /cache/openvpn/
-    mkdir -p /cache/openvpn
+    rm -rf /cache/openvpn/ipvanish/
+    mkdir -p /cache/openvpn/ipvanish
 
-    wget -q https://www.ipvanish.com/software/configs/configs.zip -P /cache/openvpn/
+    wget -q https://www.ipvanish.com/software/configs/configs.zip -P /cache/openvpn/ipvanish/
     if [ $RC -eq 1 ]; then
         echo "Failed to download new config" >> /var/log/healthcheck.log
         exit 1;
     fi
 
     echo "Unzipping"  >> /var/log/healthcheck.log
-	unzip /cache/openvpn/configs.zip -d /cache/openvpn/
+	unzip /cache/openvpn/ipvanish/configs.zip -d /cache/openvpn/ipvanish/
 
-    echo $DATE_CURRENT > /cache/openvpn/date_updated
+    echo $DATE_CURRENT > /cache/openvpn/ipvanish/date_updated
 
     #
     # Restart vpn
@@ -29,12 +29,12 @@ if [ "$DATE_CURRENT" != "$DATE_UPDATED" ]; then
 fi
 
 
-cp -f /cache/openvpn/ca.ipvanish.com.crt /app/openvpn/
+cp -f /cache/openvpn/ipvanish/ca.ipvanish.com.crt /app/openvpn/
 
 #
 # Copy one config file as template
 #
-find /cache/openvpn/ -name "*-${VPN_COUNTRY}-*" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config.ovpn
+find /cache/openvpn/ipvanish/ -name "*-${VPN_COUNTRY}-*" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config.ovpn
 
 #
 # Remove remote and verify-x509-name
@@ -50,7 +50,7 @@ echo "mute-replay-warnings" >> /app/openvpn/config.ovpn
 #
 # Create list of allowed remotes
 #
-find /cache/openvpn/ -name "*${VPN_COUNTRY}*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/allowed.remotes
+find /cache/openvpn/ipvanish/ -name "*${VPN_COUNTRY}*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/allowed.remotes
 
 if [ $INCLUDED_REMOTES != '' ]; then
 
@@ -87,8 +87,10 @@ echo "$(tail -n 32 /app/openvpn/allowed.remotes)" > /app/openvpn/allowed.remotes
 find /app/openvpn/ -name "allowed.remotes" -exec sed -n -e 's/^\(.*\)/remote \1 443/p' {} \; >> /app/openvpn/config.ovpn
 
 #
-# Randomize
+# Random remote
 #
-#echo 'remote-random' >>  /app/config.ovpn
+if [ "$VPN_RANDOM_REMOTE" = "true" ]; then
+	echo 'remote-random' >> /app/openvpn/config.ovpn
+fi
 
 exit 0;
