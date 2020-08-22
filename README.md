@@ -1,6 +1,6 @@
 # OpenVPN container for IPVanish
 A small OpenVPN client based on Alpine Linux.  
-https://hub.docker.com/r/rundqvist/ipvanish-tinyproxy/
+https://hub.docker.com/r/rundqvist/openvpn/
 
 # Appreciate my work?
 Do you find this container useful? Please consider a donation.
