@@ -3,20 +3,20 @@
 ERR=0
 
 if [ -z "$VPN_PROVIDER" ] ; then
-    echo "[WAR] VPN_PROVIDER is empty. No VPN is configured." >> /proc/1/fd/1;
+    log -w "VPN_PROVIDER is empty. No VPN is configured."
     exit 0;
 fi
 
 if [ -z "$VPN_USERNAME" ] ; then
-    echo "[ERR] VPN_USERNAME is empty." >> /proc/1/fd/1;
+    log -e "VPN_USERNAME is empty."
     ERR=1;
 fi
 if [ -z "$VPN_PASSWORD" ] ; then
-    echo "[ERR] VPN_PASSWORD is empty." >> /proc/1/fd/1;
+    log -e "VPN_PASSWORD is empty."
     ERR=1;
 fi
 if [ -z "$VPN_COUNTRY" ] ; then
-    echo "[ERR] VPN_COUNTRY is empty." >> /proc/1/fd/1;
+    log -e "VPN_COUNTRY is empty."
     ERR=1;
 fi
 
@@ -30,7 +30,7 @@ fi
 HOSTIP=$(wget http://api.ipify.org -O - -q)
 RC=$?
 if [ $RC = 1 ] ; then
-    echo "[ERR] Could not resolve host IP." >> /proc/1/fd/1;
+    log -e "Could not resolve host IP."
     exit 1;
 fi
 
@@ -47,6 +47,7 @@ chmod 755 /app/openvpn/$VPN_PROVIDER/configure.sh
 chmod 755 /app/openvpn/tls-verify.sh
 chmod 755 /app/openvpn/healthcheck.sh
 
+log -i "Configuring $VPN_PROVIDER"
 /app/openvpn/$VPN_PROVIDER/configure.sh
 
 echo "" >> /etc/supervisord.conf

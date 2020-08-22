@@ -5,18 +5,19 @@ DATE_UPDATED=$(cat /cache/openvpn/ipvanish/date_updated)
 
 if [ "$DATE_CURRENT" != "$DATE_UPDATED" ]; then
 
-    echo "Updating vpn config" >> /var/log/healthcheck.log
+    log -i "Updating vpn config"
 
     rm -rf /cache/openvpn/ipvanish/
     mkdir -p /cache/openvpn/ipvanish
 
     wget -q https://www.ipvanish.com/software/configs/configs.zip -P /cache/openvpn/ipvanish/
+    RC=$?
     if [ $RC -eq 1 ]; then
-        echo "Failed to download new config" >> /var/log/healthcheck.log
+        log -w "Failed to download new config"
         exit 1;
     fi
 
-    echo "Unzipping"  >> /var/log/healthcheck.log
+    log -i "Unzipping"
 	unzip /cache/openvpn/ipvanish/configs.zip -d /cache/openvpn/ipvanish/
 
     echo $DATE_CURRENT > /cache/openvpn/ipvanish/date_updated
@@ -52,9 +53,9 @@ echo "mute-replay-warnings" >> /app/openvpn/config.ovpn
 #
 find /cache/openvpn/ipvanish/ -name "*${VPN_COUNTRY}*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/allowed.remotes
 
-if [ $INCLUDED_REMOTES != '' ]; then
+if [ "$VPN_INCLUDED_REMOTES" != "" ]; then
 
-    for s in $INCLUDED_REMOTES ; do
+    for s in $VPN_INCLUDED_REMOTES ; do
         echo $s
     done | sort > /app/openvpn/included.remotes
 
@@ -64,9 +65,9 @@ if [ $INCLUDED_REMOTES != '' ]; then
     
 fi
 
-if [ $EXCLUDED_REMOTES != '' ]; then
+if [ "$VPN_EXCLUDED_REMOTES" != "" ]; then
 
-    for s in $EXCLUDED_REMOTES ; do
+    for s in $VPN_EXCLUDED_REMOTES ; do
         echo $s
     done | sort > /app/openvpn/excluded.remotes
 
