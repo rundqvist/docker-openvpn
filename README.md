@@ -68,4 +68,4 @@ Put configuration files in the wevpn-folder in the structure below.
 ```
 
 ## Issues
-Please report issues at https://github.com/rundqvist/openvpn/issues
+Please report issues at https://github.com/rundqvist/docker-openvpn/issues
