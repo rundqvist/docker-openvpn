@@ -38,7 +38,7 @@ docker run \
   rundqvist/openvpn
 ```
 
-### Configuration
+## Configuration
 | Variable | Usage |
 |----------|-------|
 | _VPN_PROVIDER_ | Your VPN provider ("ipvanish" or "wevpn"). |
@@ -48,12 +48,13 @@ docker run \
 | VPN_INCLUDED_REMOTES | Host names separated by one space. Restricts VPN to entered remotes. |
 | VPN_EXCLUDED_REMOTES | Host names separated by one space. VPN will not connect to entered remotes. |
 | VPN_RANDOM_REMOTE | Connects to random remote. "true" or "false". |
+
 _Cursive_ variables are mandatory.
 
-#### IPVanish
+### IPVanish
 Just enter mandatory variables and run. Container will solve configuration.
 
-#### WeVPN
+### WeVPN
 Login to the WeVPN website and use the _Manual Configuration Generator_ to download config. Select Protocol UDP and OpenVPN version v2.4+ when creating configuration.
 
 Put configuration files in the wevpn-folder in the structure below.
