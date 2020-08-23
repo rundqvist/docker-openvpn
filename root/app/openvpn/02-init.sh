@@ -49,6 +49,3 @@ chmod 755 /app/openvpn/healthcheck.sh
 
 log -i "Configuring $VPN_PROVIDER"
 /app/openvpn/$VPN_PROVIDER/configure.sh
-
-echo "" >> /etc/supervisord.conf
-cat /app/openvpn/supervisord.conf >> /etc/supervisord.conf
