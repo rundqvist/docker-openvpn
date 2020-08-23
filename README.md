@@ -1,5 +1,5 @@
-# OpenVPN container for IPVanish
-A small OpenVPN client based on Alpine Linux.  
+# OpenVPN container
+A small OpenVPN container based on Alpine Linux.  
 https://hub.docker.com/r/rundqvist/openvpn/
 
 # Appreciate my work?
@@ -20,7 +20,8 @@ Do you find this container useful? Please consider a donation.
 
 ## Components
 * Alpine Linux
-* OpenVPN
+* Supervisor container as base (https://hub.docker.com/r/rundqvist/supervisor)
+* OpenVPN (https://github.com/OpenVPN/openvpn)
 
 ## Run
 ```
