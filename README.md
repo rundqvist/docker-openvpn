@@ -22,14 +22,48 @@ Do you find this container useful? Please consider a donation.
 * Alpine Linux
 * OpenVPN
 
-## Configuration
-TODO
-
 ## Run
-TODO
+```
+docker run \
+  -d \
+  --cap-add=NET_ADMIN \
+  --device=/dev/net/tun \
+  --name=openvpn \
+  --dns [your desired public dns, for example 1.1.1.1] \ 
+  -e 'VPN_PROVIDER=[your vpn provider]' \
+  -e 'VPN_USERNAME=[your vpn username]' \
+  -e 'VPN_PASSWORD=[your vpn password]' \
+  -e 'VPN_COUNTRY=[your desired country]' \
+  -v /path/to/cache/folder:/cache/ \
+  rundqvist/openvpn
+```
 
-## Use
-TODO
+### Configuration
+| Variable | Usage |
+|----------|-------|
+| _VPN_PROVIDER_ | Your VPN provider ("ipvanish" or "wevpn"). |
+| _VPN_USERNAME_ | Your VPN username. |
+| _VPN_PASSWORD_ | Your VPN password. |
+| _VPN_COUNTRY_ | Desired country (as defined by your VPN provider). |
+| VPN_INCLUDED_REMOTES | Host names separated by one space. Restricts VPN to entered remotes. |
+| VPN_EXCLUDED_REMOTES | Host names separated by one space. VPN will not connect to entered remotes. |
+| VPN_RANDOM_REMOTE | Connects to random remote. "true" or "false". |
+_Cursive_ variables are mandatory.
+
+#### IPVanish
+Just enter mandatory variables and run. Container will solve configuration.
+
+#### WeVPN
+Login to the WeVPN website and use the _Manual Configuration Generator_ to download config. Select Protocol UDP and OpenVPN version v2.4+ when creating configuration.
+
+Put configuration files in the wevpn-folder in the structure below.
+```
+[your cache folder]
+|
+└ openvpn
+  |
+  └ wevpn
+```
 
 ## Issues
 Please report issues at https://github.com/rundqvist/openvpn/issues
