@@ -1,6 +1,7 @@
 # OpenVPN container
-A small OpenVPN container based on Alpine Linux.  
-https://hub.docker.com/r/rundqvist/openvpn/
+A small OpenVPN container based on Alpine Linux. 
+
+[![Docker pulls](https://img.shields.io/docker/pulls/rundqvist/openvpn.svg)](https://hub.docker.com/r/rundqvist/openvpn)
 
 # Appreciate my work?
 Do you find this container useful? Please consider a donation.
