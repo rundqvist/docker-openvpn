@@ -15,9 +15,10 @@ Do you find this container useful? Please consider a donation.
 * Reconnects if connection breaks
 
 ## Requirements
-* A VPN account (currently IPVanish and WeVPN is supported)
+* A supported VPN account (currently IPVanish and WeVPN is supported)
 
-[![Sign up](https://img.shields.io/badge/Affiliate-IPVanish_VPN-6fbc44)](https://www.ipvanish.com/?a_bid=48f95966&a_aid=5f3eb2f0be07f)
+[![Affiliate](https://img.shields.io/badge/Affiliate-IPVanish_VPN-6fbc44)](https://www.ipvanish.com/?a_bid=48f95966&a_aid=5f3eb2f0be07f)
+[![Affiliate](https://img.shields.io/badge/Affiliate-WeVPN-e33866)](https://www.wevpn.com/aff/rundqvist)
 
 ## Components
 * Alpine Linux
