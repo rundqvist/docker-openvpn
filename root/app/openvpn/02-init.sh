@@ -28,14 +28,6 @@ if [ $ERR = 1 ] ; then
 fi
 
 #
-# Translate VPN_COUNTRY to ISO 3166-1 alpha-2 to avoid easily fixed common mistakes
-#
-if [ "$VPN_COUNTRY" = "UK" ] ; then
-    log -i "Country 'UK' is not ISO 3166-1 alpha-2. Translating to 'GB'."
-    export VPN_COUNTRY="GB";
-fi
-
-#
 # Store host ip before starting vpn
 #
 IP=$(wget http://api.ipify.org -O - -q 2>/dev/null)
@@ -59,5 +51,20 @@ chmod 755 /app/openvpn/$VPN_PROVIDER/configure.sh
 chmod 755 /app/openvpn/tls-verify.sh
 chmod 755 /app/openvpn/healthcheck.sh
 
-log -i "Configuring $VPN_PROVIDER (selected country is '$VPN_COUNTRY')"
-/app/openvpn/$VPN_PROVIDER/configure.sh
+> /app/openvpn/supervisord.conf
+
+for country in $VPN_COUNTRY ; do
+
+    #
+    # Translate VPN_COUNTRY to ISO 3166-1 alpha-2 to avoid easily fixed common mistakes
+    #
+    if [ "$country" = "UK" ] ; then
+        log -i "Country 'UK' is not ISO 3166-1 alpha-2. Translating to 'GB'."
+        country="GB";
+    fi
+
+    log -i "Configuring $VPN_PROVIDER (selected country is '$country')"
+    /app/openvpn/$VPN_PROVIDER/configure.sh $country
+
+    sed "s/{VPN_COUNTRY}/$country/g" /app/openvpn/supervisord.template.conf >> /app/openvpn/supervisord.conf
+done
