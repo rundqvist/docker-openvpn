@@ -104,4 +104,8 @@ if [ "$VPN_RANDOM_REMOTE" = "true" ]; then
 	echo 'remote-random' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
 fi
 
+if [ -f /app/openvpn/multiple ]; then
+	echo 'route-noexec' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+fi
+
 exit 0;

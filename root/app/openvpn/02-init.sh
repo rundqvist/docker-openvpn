@@ -53,6 +53,11 @@ chmod 755 /app/openvpn/healthcheck.sh
 
 > /app/openvpn/supervisord.conf
 
+if [ $(echo $VPN_COUNTRY | wc -w) -gt 1 ] ; then
+    log -i "Configuring multiple vpn."
+    touch /app/openvpn/multiple
+fi
+
 for country in $VPN_COUNTRY ; do
 
     #

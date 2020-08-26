@@ -7,6 +7,12 @@ if [ -z "$VPN_PROVIDER" ]; then
 
 fi
 
+if [ -f /app/openvpn/multiple ]; then
+
+    echo "Multiple VPN configured."
+    exit 0;
+fi
+
 VPNIP=$(wget http://api.ipify.org -O - -q 2>/dev/null)
 RC=$?
 IP=$(cat /app/openvpn/ip)

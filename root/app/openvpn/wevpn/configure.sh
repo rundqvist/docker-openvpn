@@ -59,3 +59,7 @@ find /app/openvpn/ -name "$VPN_COUNTRY-allowed.remotes" -exec sed -n -e 's/^\(.*
 if [ "$VPN_RANDOM_REMOTE" = "true" ]; then
 	echo 'remote-random' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
 fi
+
+if [ -f /app/openvpn/multiple ]; then
+	echo 'route-noexec' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+fi
