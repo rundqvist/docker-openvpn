@@ -1,27 +1,26 @@
 #!/bin/sh
 
 DATE_CURRENT=$(date +%d)
-DATE_UPDATED=$(cat /cache/openvpn/ipvanish/date_updated)
+DATE_UPDATED=$(cat /cache/openvpn/ipvanish/date_updated 2>/dev/null)
 
 if [ "$DATE_CURRENT" != "$DATE_UPDATED" ]; then
 
-    log -i "Updating vpn config"
+    log -i "Updating ipvanish config"
 
-    rm -rf /cache/openvpn/ipvanish/
     mkdir -p /cache/openvpn/ipvanish
+    rm -f /cache/openvpn/ipvanish/configs.zip
 
-    wget -q https://www.ipvanish.com/software/configs/configs.zip -P /cache/openvpn/ipvanish/
+    wget -q https://www.ipvanish.com/software/configs/configs.zip -P /cache/openvpn/ipvanish/ 2>/dev/null
     RC=$?
     if [ $RC -eq 1 ]; then
         log -w "Failed to download new config"
-        exit 1;
+    else
+
+        log -i "Unzipping"
+        unzip -q -o /cache/openvpn/ipvanish/configs.zip -d /cache/openvpn/ipvanish/
+
+        echo $DATE_CURRENT > /cache/openvpn/ipvanish/date_updated
     fi
-
-    log -i "Unzipping"
-	unzip /cache/openvpn/ipvanish/configs.zip -d /cache/openvpn/ipvanish/
-
-    echo $DATE_CURRENT > /cache/openvpn/ipvanish/date_updated
-
     #
     # Restart vpn
     #
@@ -31,6 +30,18 @@ fi
 
 
 cp -f /cache/openvpn/ipvanish/ca.ipvanish.com.crt /app/openvpn/
+
+VPN_COUNTRY=$VPN_COUNTRY
+if [ "$VPN_COUNTRY" = "GB" ] ; then
+    VPN_COUNTRY="UK";
+
+    log -i "Translating country to 'UK' since IPVanish differs from ISO 3166-1 alpha-2"
+fi
+
+if [ -z "$(find /cache/openvpn/ipvanish/ -name "*-${VPN_COUNTRY}-*")" ] ; then
+    log -e "No config files found for country '$VPN_COUNTRY'. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
+    exit 1;
+fi
 
 #
 # Copy one config file as template

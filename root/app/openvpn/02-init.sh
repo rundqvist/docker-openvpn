@@ -5,6 +5,9 @@ ERR=0
 if [ -z "$VPN_PROVIDER" ] ; then
     log -w "VPN_PROVIDER is empty. No VPN is configured."
     exit 0;
+elif [ ! -d "/app/openvpn/$VPN_PROVIDER" ] ; then
+    log -e "VPN provider '$VPN_PROVIDER' is not supported. See https://hub.docker.com/r/rundqvist/openvpn for supported providers."
+    exit 1;
 fi
 
 if [ -z "$VPN_USERNAME" ] ; then
@@ -25,16 +28,25 @@ if [ $ERR = 1 ] ; then
 fi
 
 #
+# Translate VPN_COUNTRY to ISO 3166-1 alpha-2 to avoid easily fixed common mistakes
+#
+if [ "$VPN_COUNTRY" = "UK" ] ; then
+    log -i "Country 'UK' is not ISO 3166-1 alpha-2. Translating to 'GB'."
+    export VPN_COUNTRY="GB";
+fi
+
+#
 # Store host ip before starting vpn
 #
-HOSTIP=$(wget http://api.ipify.org -O - -q)
+IP=$(wget http://api.ipify.org -O - -q 2>/dev/null)
 RC=$?
 if [ $RC = 1 ] ; then
-    log -e "Could not resolve host IP."
+    log -e "Could not resolve IP."
     exit 1;
 fi
 
-echo $RC":"$HOSTIP > /app/openvpn/hostip
+log -i "Public IP is: $IP"
+echo $RC":"$IP > /app/openvpn/ip
 
 #
 # Create auth file
@@ -47,5 +59,5 @@ chmod 755 /app/openvpn/$VPN_PROVIDER/configure.sh
 chmod 755 /app/openvpn/tls-verify.sh
 chmod 755 /app/openvpn/healthcheck.sh
 
-log -i "Configuring $VPN_PROVIDER"
+log -i "Configuring $VPN_PROVIDER (selected country is '$VPN_COUNTRY')"
 /app/openvpn/$VPN_PROVIDER/configure.sh

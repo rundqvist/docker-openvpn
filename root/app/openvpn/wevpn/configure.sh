@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -z "$(find /cache/openvpn/wevpn/ -name "${VPN_COUNTRY}_*")" ] ; then
+    log -e "No config files found for country '$VPN_COUNTRY'. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
+    exit 1;
+fi
+
 #
 # Copy one config file as template
 #

@@ -13,6 +13,7 @@ Do you find this container useful? Please consider a donation.
 ## Features
 * Connect to random server
 * Reconnects if connection breaks
+* Healthcheck (checking that ip differs from public ip)
 
 ## Requirements
 * A supported VPN account (currently IPVanish and WeVPN is supported)
@@ -47,7 +48,7 @@ docker run \
 | _VPN_PROVIDER_ | Your VPN provider ("ipvanish" or "wevpn"). |
 | _VPN_USERNAME_ | Your VPN username. |
 | _VPN_PASSWORD_ | Your VPN password. |
-| _VPN_COUNTRY_ | Desired country (as defined by your VPN provider). |
+| _VPN_COUNTRY_ | ISO 3166-1 alpha-2 country code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). |
 | VPN_INCLUDED_REMOTES | Host names separated by one space. Restricts VPN to entered remotes. |
 | VPN_EXCLUDED_REMOTES | Host names separated by one space. VPN will not connect to entered remotes. |
 | VPN_RANDOM_REMOTE | Connects to random remote. "true" or "false". |
