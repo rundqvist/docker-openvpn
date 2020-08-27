@@ -43,6 +43,9 @@ docker run \
 ```
 
 ## Configuration
+
+### Variables
+
 | Variable | Usage |
 |----------|-------|
 | _VPN_PROVIDER_ | Your VPN provider ("ipvanish" or "wevpn"). |
@@ -53,7 +56,15 @@ docker run \
 | VPN_EXCLUDED_REMOTES | Host names separated by one space. VPN will not connect to entered remotes. |
 | VPN_RANDOM_REMOTE | Connects to random remote. "true" or "false". |
 
-_Cursive_ variables are mandatory.
+Variables in _cursive_ is mandatory.
+
+### Volumes
+
+| Folder | Usage |
+|--------|-------|
+| /cache/ | Used for caching original configuration files from vpn provider |
+
+## Setup
 
 ### IPVanish
 Just enter mandatory variables and run. Container will solve configuration.
