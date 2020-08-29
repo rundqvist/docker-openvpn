@@ -81,11 +81,11 @@ for country in $VPN_COUNTRY ; do
     # Random remote
     #
     if [ "$VPN_RANDOM_REMOTE" = "true" ]; then
-        echo 'remote-random' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+        echo 'remote-random' >> /app/openvpn/config-$country.ovpn
     fi
 
     if [ -f /app/openvpn/multiple ]; then
-        echo 'route-noexec' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+        echo 'route-noexec' >> /app/openvpn/config-$country.ovpn
     fi
 
     sed "s/{VPN_COUNTRY}/$country/g" /app/openvpn/supervisord.template.conf >> /app/openvpn/supervisord.conf
