@@ -3,7 +3,7 @@
 VPN_COUNTRY=$1
 
 if [ -z "$(find /cache/openvpn/wevpn/ -name "${VPN_COUNTRY}_*")" ] ; then
-    log -e "No config files found for country '$VPN_COUNTRY'. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
+    log -e "No config files found for selected country. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
     exit 1;
 fi
 
@@ -13,7 +13,7 @@ fi
 find /cache/openvpn/wevpn/ -name "${VPN_COUNTRY}_*" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config-$VPN_COUNTRY.ovpn
 
 #
-# Add user.config path
+# Add user.conf path
 #
 sed -i 's/^auth-user-pass/auth-user-pass \/app\/openvpn\/auth.conf/g' /app/openvpn/config-$VPN_COUNTRY.ovpn
 
@@ -53,13 +53,4 @@ sed -i '/remote /d' /app/openvpn/config-$VPN_COUNTRY.ovpn
 echo "" >> /app/openvpn/config-$VPN_COUNTRY.ovpn
 find /app/openvpn/ -name "$VPN_COUNTRY-allowed.remotes" -exec sed -n -e 's/^\(.*\)/remote \1 1194/p' {} \; >> /app/openvpn/config-$VPN_COUNTRY.ovpn
 
-#
-# Random remote
-#
-if [ "$VPN_RANDOM_REMOTE" = "true" ]; then
-	echo 'remote-random' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
-fi
-
-if [ -f /app/openvpn/multiple ]; then
-	echo 'route-noexec' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
-fi
+exit 0;

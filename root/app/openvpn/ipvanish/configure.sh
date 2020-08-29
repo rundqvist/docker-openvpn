@@ -50,7 +50,6 @@ find /cache/openvpn/ipvanish/ -name "*-${IPVANISH_COUNTRY}-*" -print | head -1 |
 #
 # Remove remote and verify-x509-name
 #
-sed -i '/remote /d' /app/openvpn/config-$VPN_COUNTRY.ovpn
 sed -i '/verify-x509-name /d' /app/openvpn/config-$VPN_COUNTRY.ovpn
 
 sed -i 's/^ca \(.*\)/ca \/app\/openvpn\/\1/g' /app/openvpn/config-$VPN_COUNTRY.ovpn
@@ -95,17 +94,8 @@ echo "$(tail -n 32 /app/openvpn/$VPN_COUNTRY-allowed.remotes)" > /app/openvpn/$V
 #
 # Add allowed remotes as remotes
 #
+sed -i '/remote /d' /app/openvpn/config-$VPN_COUNTRY.ovpn
+echo "" >> /app/openvpn/config-$VPN_COUNTRY.ovpn
 find /app/openvpn/ -name "$VPN_COUNTRY-allowed.remotes" -exec sed -n -e 's/^\(.*\)/remote \1 443/p' {} \; >> /app/openvpn/config-$VPN_COUNTRY.ovpn
-
-#
-# Random remote
-#
-if [ "$VPN_RANDOM_REMOTE" = "true" ]; then
-	echo 'remote-random' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
-fi
-
-if [ -f /app/openvpn/multiple ]; then
-	echo 'route-noexec' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
-fi
 
 exit 0;

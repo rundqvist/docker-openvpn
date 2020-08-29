@@ -50,6 +50,8 @@ chmod 600 /app/openvpn/auth.conf
 chmod 755 /app/openvpn/$VPN_PROVIDER/configure.sh
 chmod 755 /app/openvpn/tls-verify.sh
 chmod 755 /app/openvpn/healthcheck.sh
+chmod 755 /app/openvpn/on-up.sh
+chmod 755 /app/openvpn/on-down.sh
 
 > /app/openvpn/supervisord.conf
 
@@ -68,8 +70,24 @@ for country in $VPN_COUNTRY ; do
         country="GB";
     fi
 
-    log -i "Configuring $VPN_PROVIDER (selected country is '$country')"
+    log -i "Configuring $VPN_PROVIDER with '$country' tunnel"
+    
+    #
+    # Provider specific configuration
+    #
     /app/openvpn/$VPN_PROVIDER/configure.sh $country
 
+    #
+    # Random remote
+    #
+    if [ "$VPN_RANDOM_REMOTE" = "true" ]; then
+        echo 'remote-random' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+    fi
+
+    if [ -f /app/openvpn/multiple ]; then
+        echo 'route-noexec' >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+    fi
+
     sed "s/{VPN_COUNTRY}/$country/g" /app/openvpn/supervisord.template.conf >> /app/openvpn/supervisord.conf
+
 done
