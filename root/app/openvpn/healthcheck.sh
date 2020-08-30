@@ -1,13 +1,13 @@
 #!/bin/sh
 
-if [ -z "$VPN_PROVIDER" ]; then
+if [ -z "$(getv VPN_PROVIDER)" ]; then
 
     echo "No VPN provider specified."
     exit 1;
 
 fi
 
-if [ -f /app/openvpn/multiple ]; then
+if [ "$(getv VPN_MULTIPLE)" = "true" ]; then
 
     echo "Multiple VPN configured."
     exit 0;

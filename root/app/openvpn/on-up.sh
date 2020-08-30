@@ -23,7 +23,7 @@ for filepath in $EVENTS ; do
     RC=$?
 
     if [ $RC -eq 1 ]; then
-        echo "Event $filepath failed";
+        log -e "Event $filepath $COUNTRY $TUN $IP failed";
         exit 1;
     fi
 done
