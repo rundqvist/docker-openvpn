@@ -1,11 +1,11 @@
 #!/bin/sh
 
 ERR=0
-VPN_PROVIDER=$(getv VPN_PROVIDER)
-VPN_USERNAME=$(getv VPN_USERNAME)
-VPN_PASSWORD=$(getv VPN_PASSWORD)
-VPN_COUNTRY=$(getv VPN_COUNTRY)
-VPN_RANDOM_REMOTE=$(getv VPN_RANDOM_REMOTE)
+VPN_PROVIDER=$(var VPN_PROVIDER)
+VPN_USERNAME=$(var VPN_USERNAME)
+VPN_PASSWORD=$(var VPN_PASSWORD)
+VPN_COUNTRY=$(var VPN_COUNTRY)
+VPN_RANDOM_REMOTE=$(var VPN_RANDOM_REMOTE)
 
 if [ -z "$VPN_PROVIDER" ] ; then
     log -w "VPN_PROVIDER is empty. No VPN is configured."
@@ -62,7 +62,7 @@ chmod 755 /app/openvpn/on-down.sh
 
 if [ $(echo $VPN_COUNTRY | wc -w) -gt 1 ] ; then
     log -i "Configuring multiple vpn."
-    setv VPN_MULTIPLE true
+    var VPN_MULTIPLE true
 fi
 
 for country in $VPN_COUNTRY ; do
@@ -89,7 +89,7 @@ for country in $VPN_COUNTRY ; do
         echo 'remote-random' >> /app/openvpn/config-$country.ovpn
     fi
 
-    if [ "$(getv VPN_MULTIPLE)" = "true" ]; then
+    if [ "$(var VPN_MULTIPLE)" = "true" ]; then
         echo 'route-noexec' >> /app/openvpn/config-$country.ovpn
     fi
 

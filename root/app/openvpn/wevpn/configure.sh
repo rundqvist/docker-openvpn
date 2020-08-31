@@ -2,8 +2,8 @@
 
 VPN_COUNTRY=$1
 
-VPN_INCLUDED_REMOTES=$(getv VPN_INCLUDED_REMOTES)
-VPN_EXCLUDED_REMOTES=$(getv VPN_EXCLUDED_REMOTES)
+VPN_INCLUDED_REMOTES=$(var VPN_INCLUDED_REMOTES)
+VPN_EXCLUDED_REMOTES=$(var VPN_EXCLUDED_REMOTES)
 
 if [ -z "$(find /cache/openvpn/wevpn/ -name "${VPN_COUNTRY}_*")" ] ; then
     log -e "No config files found for selected country. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
