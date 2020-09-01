@@ -3,12 +3,12 @@ A small OpenVPN container based on Alpine Linux.
 
 [![Docker pulls](https://img.shields.io/docker/pulls/rundqvist/openvpn.svg)](https://hub.docker.com/r/rundqvist/openvpn)
 
-# Appreciate my work?
-Do you find this container useful? Please consider a donation.
+# Do you find this container useful? 
+Please support the development by making a small donation.
 
-[![Donate](https://img.shields.io/badge/Donate-Flattr-brightgreen)](https://flattr.com/@rundqvist)
-[![Donate](https://img.shields.io/badge/Donate-Buy%20me%20a%20coffee-orange)](https://www.buymeacoffee.com/rundqvist)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-blue)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SZ7J9JL9P5DGE&source=url)
+[![Support](https://img.shields.io/badge/support-Flattr-brightgreen)](https://flattr.com/@rundqvist)
+[![Support](https://img.shields.io/badge/support-Buy%20me%20a%20coffee-orange)](https://www.buymeacoffee.com/rundqvist)
+[![Support](https://img.shields.io/badge/support-PayPal-blue)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SZ7J9JL9P5DGE&source=url)
 
 ## Features
 * Connect to random server
@@ -16,10 +16,10 @@ Do you find this container useful? Please consider a donation.
 * Healthcheck (checking that ip differs from public ip)
 
 ## Requirements
-* A supported VPN account (currently IPVanish and WeVPN is supported)
+* A supported VPN account (currently [IPVanish](https://www.ipvanish.com/?a_bid=48f95966&a_aid=5f3eb2f0be07f) or [WeVPN](https://www.wevpn.com/aff/rundqvist))
 
-[![Affiliate](https://img.shields.io/badge/Affiliate-IPVanish_VPN-6fbc44)](https://www.ipvanish.com/?a_bid=48f95966&a_aid=5f3eb2f0be07f)
-[![Affiliate](https://img.shields.io/badge/Affiliate-WeVPN-e33866)](https://www.wevpn.com/aff/rundqvist)
+[![Sign up](https://img.shields.io/badge/sign_up-IPVanish_VPN-6fbc44)](https://www.ipvanish.com/?a_bid=48f95966&a_aid=5f3eb2f0be07f)
+[![Sign up](https://img.shields.io/badge/sign_up-WeVPN-e33866)](https://www.wevpn.com/aff/rundqvist)
 
 ## Components
 * Alpine Linux
@@ -48,7 +48,7 @@ docker run \
 
 | Variable | Usage |
 |----------|-------|
-| _VPN_PROVIDER_ | Your VPN provider ("ipvanish" or "wevpn"). |
+| _VPN_PROVIDER_ | Your VPN provider ("[ipvanish](https://www.ipvanish.com/?a_bid=48f95966&a_aid=5f3eb2f0be07f)" or "[wevpn](https://www.wevpn.com/aff/rundqvist)"). |
 | _VPN_USERNAME_ | Your VPN username. |
 | _VPN_PASSWORD_ | Your VPN password. |
 | _VPN_COUNTRY_ | ISO 3166-1 alpha-2 country code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). |
