@@ -1,6 +1,11 @@
 #!/bin/sh
 
 ERR=0
+VPN_PROVIDER=$(var VPN_PROVIDER)
+VPN_USERNAME=$(var VPN_USERNAME)
+VPN_PASSWORD=$(var VPN_PASSWORD)
+VPN_COUNTRY=$(var VPN_COUNTRY)
+VPN_RANDOM_REMOTE=$(var VPN_RANDOM_REMOTE)
 
 if [ -z "$VPN_PROVIDER" ] ; then
     log -w "VPN_PROVIDER is empty. No VPN is configured."
@@ -28,14 +33,6 @@ if [ $ERR = 1 ] ; then
 fi
 
 #
-# Translate VPN_COUNTRY to ISO 3166-1 alpha-2 to avoid easily fixed common mistakes
-#
-if [ "$VPN_COUNTRY" = "UK" ] ; then
-    log -i "Country 'UK' is not ISO 3166-1 alpha-2. Translating to 'GB'."
-    export VPN_COUNTRY="GB";
-fi
-
-#
 # Store host ip before starting vpn
 #
 IP=$(wget http://api.ipify.org -O - -q 2>/dev/null)
@@ -58,6 +55,44 @@ chmod 600 /app/openvpn/auth.conf
 chmod 755 /app/openvpn/$VPN_PROVIDER/configure.sh
 chmod 755 /app/openvpn/tls-verify.sh
 chmod 755 /app/openvpn/healthcheck.sh
+chmod 755 /app/openvpn/on-up.sh
+chmod 755 /app/openvpn/on-down.sh
 
-log -i "Configuring $VPN_PROVIDER (selected country is '$VPN_COUNTRY')"
-/app/openvpn/$VPN_PROVIDER/configure.sh
+> /app/openvpn/supervisord.conf
+
+if [ $(echo $VPN_COUNTRY | wc -w) -gt 1 ] ; then
+    log -i "Configuring multiple vpn."
+    var VPN_MULTIPLE true
+fi
+
+for country in $VPN_COUNTRY ; do
+
+    #
+    # Translate VPN_COUNTRY to ISO 3166-1 alpha-2 to avoid easily fixed common mistakes
+    #
+    if [ "$country" = "UK" ] ; then
+        log -i "Country 'UK' is not ISO 3166-1 alpha-2. Translating to 'GB'."
+        country="GB";
+    fi
+
+    log -i "Configuring $VPN_PROVIDER with '$country' tunnel"
+    
+    #
+    # Provider specific configuration
+    #
+    /app/openvpn/$VPN_PROVIDER/configure.sh $country
+
+    #
+    # Random remote
+    #
+    if [ "$VPN_RANDOM_REMOTE" = "true" ]; then
+        echo 'remote-random' >> /app/openvpn/config-$country.ovpn
+    fi
+
+    if [ "$(var VPN_MULTIPLE)" = "true" ]; then
+        echo 'route-noexec' >> /app/openvpn/config-$country.ovpn
+    fi
+
+    sed "s/{VPN_COUNTRY}/$country/g" /app/openvpn/supervisord.template.conf >> /app/openvpn/supervisord.conf
+
+done

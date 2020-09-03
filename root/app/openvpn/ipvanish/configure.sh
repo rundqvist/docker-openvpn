@@ -3,6 +3,9 @@
 DATE_CURRENT=$(date +%d)
 DATE_UPDATED=$(cat /cache/openvpn/ipvanish/date_updated 2>/dev/null)
 
+VPN_INCLUDED_REMOTES=$(var VPN_INCLUDED_REMOTES)
+VPN_EXCLUDED_REMOTES=$(var VPN_EXCLUDED_REMOTES)
+
 if [ "$DATE_CURRENT" != "$DATE_UPDATED" ]; then
 
     log -i "Updating ipvanish config"
@@ -21,48 +24,46 @@ if [ "$DATE_CURRENT" != "$DATE_UPDATED" ]; then
 
         echo $DATE_CURRENT > /cache/openvpn/ipvanish/date_updated
     fi
-    #
-    # Restart vpn
-    #
-    #echo "Restarting"  >> /var/log/healthcheck.log
-    #killall -s HUP openvpn
+    
 fi
 
+if [ ! -f /app/openvpn/ca.ipvanish.com.crt ] ; then
+    cp -f /cache/openvpn/ipvanish/ca.ipvanish.com.crt /app/openvpn/
+fi
 
-cp -f /cache/openvpn/ipvanish/ca.ipvanish.com.crt /app/openvpn/
+VPN_COUNTRY=$1
+IPVANISH_COUNTRY=$1
 
-VPN_COUNTRY=$VPN_COUNTRY
 if [ "$VPN_COUNTRY" = "GB" ] ; then
-    VPN_COUNTRY="UK";
+    IPVANISH_COUNTRY="UK";
 
-    log -i "Translating country to 'UK' since IPVanish differs from ISO 3166-1 alpha-2"
+    log -i "Parsing config files for 'UK' instead of 'GB' since IPVanish differs from ISO 3166-1 alpha-2"
 fi
 
-if [ -z "$(find /cache/openvpn/ipvanish/ -name "*-${VPN_COUNTRY}-*")" ] ; then
-    log -e "No config files found for country '$VPN_COUNTRY'. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
+if [ -z "$(find /cache/openvpn/ipvanish/ -name "*-${IPVANISH_COUNTRY}-*")" ] ; then
+    log -e "No config files found for selected country. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
     exit 1;
 fi
 
 #
 # Copy one config file as template
 #
-find /cache/openvpn/ipvanish/ -name "*-${VPN_COUNTRY}-*" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config.ovpn
+find /cache/openvpn/ipvanish/ -name "*-${IPVANISH_COUNTRY}-*" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config-$VPN_COUNTRY.ovpn
 
 #
 # Remove remote and verify-x509-name
 #
-sed -i '/remote /d' /app/openvpn/config.ovpn
-sed -i '/verify-x509-name /d' /app/openvpn/config.ovpn
+sed -i '/verify-x509-name /d' /app/openvpn/config-$VPN_COUNTRY.ovpn
 
-sed -i 's/^ca \(.*\)/ca \/app\/openvpn\/\1/g' /app/openvpn/config.ovpn
-sed -i 's/^auth-user-pass/auth-user-pass \/app\/openvpn\/auth.conf/g' /app/openvpn/config.ovpn
-echo 'tls-verify "/app/openvpn/tls-verify.sh /app/openvpn/allowed.remotes"' >> /app/openvpn/config.ovpn
-echo "mute-replay-warnings" >> /app/openvpn/config.ovpn
+sed -i 's/^ca \(.*\)/ca \/app\/openvpn\/\1/g' /app/openvpn/config-$VPN_COUNTRY.ovpn
+sed -i 's/^auth-user-pass/auth-user-pass \/app\/openvpn\/auth.conf/g' /app/openvpn/config-$VPN_COUNTRY.ovpn
+echo "tls-verify '/app/openvpn/tls-verify.sh /app/openvpn/$VPN_COUNTRY-allowed.remotes'" >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+echo "mute-replay-warnings" >> /app/openvpn/config-$VPN_COUNTRY.ovpn
 
 #
 # Create list of allowed remotes
 #
-find /cache/openvpn/ipvanish/ -name "*${VPN_COUNTRY}*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/allowed.remotes
+find /cache/openvpn/ipvanish/ -name "*${IPVANISH_COUNTRY}*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/$VPN_COUNTRY-allowed.remotes
 
 if [ "$VPN_INCLUDED_REMOTES" != "" ]; then
 
@@ -70,9 +71,9 @@ if [ "$VPN_INCLUDED_REMOTES" != "" ]; then
         echo $s
     done | sort > /app/openvpn/included.remotes
 
-    comm /app/openvpn/allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/tmp.remotes  
+    comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/tmp.remotes  
     rm -f /app/openvpn/included.remotes
-    mv -f /app/openvpn/tmp.remotes /app/openvpn/allowed.remotes
+    mv -f /app/openvpn/tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
     
 fi
 
@@ -82,27 +83,22 @@ if [ "$VPN_EXCLUDED_REMOTES" != "" ]; then
         echo $s
     done | sort > /app/openvpn/excluded.remotes
 
-    comm /app/openvpn/allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/tmp.remotes  
+    comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/tmp.remotes  
     rm -f /app/openvpn/excluded.remotes
-    mv -f /app/openvpn/tmp.remotes /app/openvpn/allowed.remotes
+    mv -f /app/openvpn/tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
     
 fi
 
 #
 #  Make sure list is not too long
 #
-echo "$(tail -n 32 /app/openvpn/allowed.remotes)" > /app/openvpn/allowed.remotes
+echo "$(tail -n 32 /app/openvpn/$VPN_COUNTRY-allowed.remotes)" > /app/openvpn/$VPN_COUNTRY-allowed.remotes
 
 #
 # Add allowed remotes as remotes
 #
-find /app/openvpn/ -name "allowed.remotes" -exec sed -n -e 's/^\(.*\)/remote \1 443/p' {} \; >> /app/openvpn/config.ovpn
-
-#
-# Random remote
-#
-if [ "$VPN_RANDOM_REMOTE" = "true" ]; then
-	echo 'remote-random' >> /app/openvpn/config.ovpn
-fi
+sed -i '/remote /d' /app/openvpn/config-$VPN_COUNTRY.ovpn
+echo "" >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+find /app/openvpn/ -name "$VPN_COUNTRY-allowed.remotes" -exec sed -n -e 's/^\(.*\)/remote \1 443/p' {} \; >> /app/openvpn/config-$VPN_COUNTRY.ovpn
 
 exit 0;
