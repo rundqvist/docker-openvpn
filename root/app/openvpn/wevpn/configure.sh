@@ -6,7 +6,7 @@ VPN_INCLUDED_REMOTES=$(var VPN_INCLUDED_REMOTES)
 VPN_EXCLUDED_REMOTES=$(var VPN_EXCLUDED_REMOTES)
 
 if [ -z "$(find /cache/openvpn/wevpn/ -name "$VPN_COUNTRY_*")" ] ; then
-    log -e "No config files found for selected country. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
+    log -e openvpn "No config files found for selected country. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
     exit 1;
 fi
 
@@ -25,28 +25,14 @@ sed -i 's/^auth-user-pass/auth-user-pass \/app\/openvpn\/auth.conf/g' /app/openv
 #
 find /cache/openvpn/wevpn/ -name "$VPN_COUNTRY_*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/$VPN_COUNTRY-allowed.remotes
 
-if [ "$VPN_INCLUDED_REMOTES" != "" ]; then
-
-    for s in $VPN_INCLUDED_REMOTES ; do
-        echo $s
-    done | sort > /app/openvpn/included.remotes
-
-    comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/tmp.remotes  
-    rm -f /app/openvpn/included.remotes
-    mv -f /app/openvpn/tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
-    
+if [ -f /app/openvpn/included.remotes ]; then
+    comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/$VPN_COUNTRY-tmp.remotes
+    mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes 
 fi
 
-if [ "$VPN_EXCLUDED_REMOTES" != "" ]; then
-
-    for s in $VPN_EXCLUDED_REMOTES ; do
-        echo $s
-    done | sort > /app/openvpn/excluded.remotes
-
-    comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/tmp.remotes  
-    rm -f /app/openvpn/excluded.remotes
-    mv -f /app/openvpn/tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
-    
+if [ -f /app/openvpn/excluded.remotes ]; then
+    comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/$VPN_COUNTRY-tmp.remotes 
+    mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
 fi
 
 #

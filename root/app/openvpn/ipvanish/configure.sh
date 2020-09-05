@@ -8,7 +8,7 @@ VPN_EXCLUDED_REMOTES=$(var VPN_EXCLUDED_REMOTES)
 
 if [ "$DATE_CURRENT" != "$DATE_UPDATED" ]; then
 
-    log -i "Updating ipvanish config"
+    log -i openvpn "Updating ipvanish config"
 
     mkdir -p /cache/openvpn/ipvanish
     rm -f /cache/openvpn/ipvanish/configs.zip
@@ -16,10 +16,10 @@ if [ "$DATE_CURRENT" != "$DATE_UPDATED" ]; then
     wget -q https://www.ipvanish.com/software/configs/configs.zip -P /cache/openvpn/ipvanish/ 2>/dev/null
     RC=$?
     if [ $RC -eq 1 ]; then
-        log -w "Failed to download new config"
+        log -w openvpn "Failed to download new config"
     else
 
-        log -i "Unzipping"
+        log -i openvpn "Unzipping"
         unzip -q -o /cache/openvpn/ipvanish/configs.zip -d /cache/openvpn/ipvanish/
 
         echo $DATE_CURRENT > /cache/openvpn/ipvanish/date_updated
@@ -37,11 +37,11 @@ IPVANISH_COUNTRY=$1
 if [ "$VPN_COUNTRY" = "GB" ] ; then
     IPVANISH_COUNTRY="UK";
 
-    log -i "Parsing config files for 'UK' instead of 'GB' since IPVanish differs from ISO 3166-1 alpha-2"
+    log -i openvpn "Parsing config files for 'UK' instead of 'GB' since IPVanish differs from ISO 3166-1 alpha-2"
 fi
 
 if [ -z "$(find /cache/openvpn/ipvanish/ -name "*-$IPVANISH_COUNTRY-*")" ] ; then
-    log -e "No config files found for selected country. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
+    log -e openvpn "No config files found for selected country. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
     exit 1;
 fi
 
@@ -65,27 +65,17 @@ echo "mute-replay-warnings" >> /app/openvpn/config-$VPN_COUNTRY.ovpn
 #
 find /cache/openvpn/ipvanish/ -name "*-$IPVANISH_COUNTRY-*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/$VPN_COUNTRY-allowed.remotes
 
-if [ "$VPN_INCLUDED_REMOTES" != "" ]; then
+if [ -f /app/openvpn/included.remotes ]; then
 
-    for s in $VPN_INCLUDED_REMOTES ; do
-        echo $s
-    done | sort > /app/openvpn/included.remotes
-
-    comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/tmp.remotes  
-    rm -f /app/openvpn/included.remotes
-    mv -f /app/openvpn/tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
+    comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/$VPN_COUNTRY-tmp.remotes
+    mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
     
 fi
 
-if [ "$VPN_EXCLUDED_REMOTES" != "" ]; then
+if [ -f /app/openvpn/excluded.remotes ]; then
 
-    for s in $VPN_EXCLUDED_REMOTES ; do
-        echo $s
-    done | sort > /app/openvpn/excluded.remotes
-
-    comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/tmp.remotes  
-    rm -f /app/openvpn/excluded.remotes
-    mv -f /app/openvpn/tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
+    comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/$VPN_COUNTRY-tmp.remotes 
+    mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
     
 fi
 

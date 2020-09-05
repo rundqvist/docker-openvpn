@@ -1,5 +1,7 @@
 #!/bin/sh
 
+log -v openvpn "[health] Check health"
+
 if [ -z "$(var VPN_PROVIDER)" ]; then
 
     echo "No VPN provider specified."
