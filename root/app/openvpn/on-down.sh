@@ -4,6 +4,8 @@ COUNTRY=$1
 TUN=$2
 IP=$5
 
+log -i "[OpenVPN] Country: $COUNTRY is down."
+
 #
 # Find all on-openvpn-down.sh files
 #
@@ -14,6 +16,7 @@ for filepath in $EVENTS ; do
     #
     # Ensure execution rights and execute file
     #
+    log -d "[OpenVPN] OnDown event. Executing $filepath $COUNTRY $TUN $IP"
     chmod +x $filepath    
     $filepath $COUNTRY $TUN $IP
 
@@ -23,7 +26,7 @@ for filepath in $EVENTS ; do
     RC=$?
 
     if [ $RC -eq 1 ]; then
-        log -e "Event $filepath $COUNTRY $TUN $IP failed";
+        log -e "[OpenVPN] $filepath $COUNTRY $TUN $IP failed";
         exit 1;
     fi
 done

@@ -40,7 +40,7 @@ if [ "$VPN_COUNTRY" = "GB" ] ; then
     log -i "Parsing config files for 'UK' instead of 'GB' since IPVanish differs from ISO 3166-1 alpha-2"
 fi
 
-if [ -z "$(find /cache/openvpn/ipvanish/ -name "*-${IPVANISH_COUNTRY}-*")" ] ; then
+if [ -z "$(find /cache/openvpn/ipvanish/ -name "*-$IPVANISH_COUNTRY-*")" ] ; then
     log -e "No config files found for selected country. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
     exit 1;
 fi
@@ -48,7 +48,7 @@ fi
 #
 # Copy one config file as template
 #
-find /cache/openvpn/ipvanish/ -name "*-${IPVANISH_COUNTRY}-*" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config-$VPN_COUNTRY.ovpn
+find /cache/openvpn/ipvanish/ -name "*-$IPVANISH_COUNTRY-*" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config-$VPN_COUNTRY.ovpn
 
 #
 # Remove remote and verify-x509-name
@@ -63,7 +63,7 @@ echo "mute-replay-warnings" >> /app/openvpn/config-$VPN_COUNTRY.ovpn
 #
 # Create list of allowed remotes
 #
-find /cache/openvpn/ipvanish/ -name "*${IPVANISH_COUNTRY}*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/$VPN_COUNTRY-allowed.remotes
+find /cache/openvpn/ipvanish/ -name "*-$IPVANISH_COUNTRY-*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/$VPN_COUNTRY-allowed.remotes
 
 if [ "$VPN_INCLUDED_REMOTES" != "" ]; then
 

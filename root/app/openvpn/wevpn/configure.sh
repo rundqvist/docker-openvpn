@@ -5,7 +5,7 @@ VPN_COUNTRY=$1
 VPN_INCLUDED_REMOTES=$(var VPN_INCLUDED_REMOTES)
 VPN_EXCLUDED_REMOTES=$(var VPN_EXCLUDED_REMOTES)
 
-if [ -z "$(find /cache/openvpn/wevpn/ -name "${VPN_COUNTRY}_*")" ] ; then
+if [ -z "$(find /cache/openvpn/wevpn/ -name "$VPN_COUNTRY_*")" ] ; then
     log -e "No config files found for selected country. See https://hub.docker.com/r/rundqvist/openvpn for configuration."
     exit 1;
 fi
@@ -13,7 +13,7 @@ fi
 #
 # Copy one config file as template
 #
-find /cache/openvpn/wevpn/ -name "${VPN_COUNTRY}_*" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config-$VPN_COUNTRY.ovpn
+find /cache/openvpn/wevpn/ -name "$VPN_COUNTRY_*" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config-$VPN_COUNTRY.ovpn
 
 #
 # Add user.conf path
@@ -23,7 +23,7 @@ sed -i 's/^auth-user-pass/auth-user-pass \/app\/openvpn\/auth.conf/g' /app/openv
 #
 # Resolve remotes
 #
-find /cache/openvpn/wevpn/ -name "${VPN_COUNTRY}_*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/$VPN_COUNTRY-allowed.remotes
+find /cache/openvpn/wevpn/ -name "$VPN_COUNTRY_*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/$VPN_COUNTRY-allowed.remotes
 
 if [ "$VPN_INCLUDED_REMOTES" != "" ]; then
 
