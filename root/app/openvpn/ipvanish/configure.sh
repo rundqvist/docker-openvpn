@@ -66,17 +66,13 @@ echo "mute-replay-warnings" >> /app/openvpn/config-$VPN_COUNTRY.ovpn
 find /cache/openvpn/ipvanish/ -name "*-$IPVANISH_COUNTRY-*" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/$VPN_COUNTRY-allowed.remotes
 
 if [ -f /app/openvpn/included.remotes ]; then
-
     comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/$VPN_COUNTRY-tmp.remotes
-    mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
-    
+    mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes 
 fi
 
 if [ -f /app/openvpn/excluded.remotes ]; then
-
     comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/$VPN_COUNTRY-tmp.remotes 
     mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
-    
 fi
 
 #
