@@ -116,7 +116,7 @@ for country in $VPN_COUNTRY ; do
     else
         sed "s/{VPN_COUNTRY}/$country/g" /app/openvpn/supervisord.template.conf >> /app/openvpn/supervisord.conf
         for remote in $(cat /app/openvpn/$country-allowed.remotes) ; do
-            log -d openvpn "Allowed remote ($country): $remote"
+            log -v openvpn "Allowed remote ($country): $remote"
         done
     fi
 done
