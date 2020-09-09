@@ -25,6 +25,6 @@ if expr "$(var NETWORK)" : '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.0$' >/dev/nul
 else
 
     log -w openvpn "NETWORK is unknown.";
-    var -d HOST_IP
+    var -d NETWORK
 
 fi
