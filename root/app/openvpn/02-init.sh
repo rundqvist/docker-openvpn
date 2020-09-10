@@ -104,24 +104,28 @@ for country in $VPN_COUNTRY ; do
     #
     # Killswitch 
     #
-    if [ "$(var VPN_KILLSWITCH)" = "true" ] ; then
-
-        log -i openvpn "Killswitch enabled."
-
-        iptables -P OUTPUT DROP
-        iptables -A OUTPUT -p udp -m udp --dport $(var VPN_PORT) -j ACCEPT
-        iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-        iptables -A OUTPUT -o tun0 -j ACCEPT
-        NS=$(cat /etc/resolv.conf | grep "nameserver" | sed 's/nameserver \(.*\)/\1/g')
-
-        for s in $NS; do
-            iptables -A OUTPUT -d $s -j ACCEPT
-        done
-    
+    if [ "$(var VPN_MULTIPLE)" = "true" ] ; then
+        if [ "$(var VPN_KILLSWITCH)" = "true" ] ; then
+            log -i openvpn "Killswitch not possible with multiple VPN configured. Disabling."
+            var VPN_KILLSWITCH false
+        fi
     else
+        if [ "$(var VPN_KILLSWITCH)" = "true" ] ; then
 
-        log -w openvpn "Killswitch disabled."
-    
+            log -i openvpn "Killswitch enabled."
+
+            iptables -P OUTPUT DROP
+            iptables -A OUTPUT -p udp -m udp --dport $(var VPN_PORT) -j ACCEPT
+            iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+            iptables -A OUTPUT -o tun0 -j ACCEPT
+            NS=$(cat /etc/resolv.conf | grep "nameserver" | sed 's/nameserver \(.*\)/\1/g')
+
+            for s in $NS; do
+                iptables -A OUTPUT -d $s -j ACCEPT
+            done
+        else
+            log -w openvpn "Killswitch disabled."        
+        fi
     fi
 
     #
@@ -132,29 +136,29 @@ for country in $VPN_COUNTRY ; do
     #
     # Add user.conf path
     #
-    sed -i 's/^auth-user-pass/auth-user-pass \/app\/openvpn\/auth.conf/g' /app/openvpn/config-$VPN_COUNTRY.ovpn
+    sed -i 's/^auth-user-pass/auth-user-pass \/app\/openvpn\/auth.conf/g' /app/openvpn/config-$country.ovpn
 
     if [ -f /app/openvpn/included.remotes ]; then
-        comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/$VPN_COUNTRY-tmp.remotes
-        mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes 
+        comm /app/openvpn/$country-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/$country-tmp.remotes
+        mv -f /app/openvpn/$country-tmp.remotes /app/openvpn/$country-allowed.remotes 
     fi
 
     if [ -f /app/openvpn/excluded.remotes ]; then
-        comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/$VPN_COUNTRY-tmp.remotes 
-        mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
+        comm /app/openvpn/$country-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/$country-tmp.remotes 
+        mv -f /app/openvpn/$country-tmp.remotes /app/openvpn/$country-allowed.remotes
     fi
 
     #
     #  Make sure list is not too long
     #
-    echo "$(tail -n 32 /app/openvpn/$VPN_COUNTRY-allowed.remotes)" > /app/openvpn/$VPN_COUNTRY-allowed.remotes
+    echo "$(tail -n 32 /app/openvpn/$country-allowed.remotes)" > /app/openvpn/$country-allowed.remotes
 
     #
     # Add allowed remotes as remotes
     #
-    sed -i '/remote /d' /app/openvpn/config-$VPN_COUNTRY.ovpn
-    echo "" >> /app/openvpn/config-$VPN_COUNTRY.ovpn
-    find /app/openvpn/ -name "$VPN_COUNTRY-allowed.remotes" -exec sed -n -e "s/^\(.*\)/remote \1 $(var VPN_PORT)/p" {} \; >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+    sed -i '/remote /d' /app/openvpn/config-$country.ovpn
+    echo "" >> /app/openvpn/config-$country.ovpn
+    find /app/openvpn/ -name "$country-allowed.remotes" -exec sed -n -e "s/^\(.*\)/remote \1 $(var VPN_PORT)/p" {} \; >> /app/openvpn/config-$country.ovpn
 
 
     #

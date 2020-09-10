@@ -13,8 +13,6 @@ VPNIP=$(wget http://api.ipify.org -O - -q 2>/dev/null)
 RC=$?
 IP=$(cat /app/openvpn/ip)
 
-log -v openvpn "[health] IP is $VPNIP"
-
 if [ $RC -eq 1 ]; then
     echo "No internet connection."
     exit 1;
@@ -28,6 +26,7 @@ elif [ $RC":"$VPNIP = $IP ]; then
 	exit 1;
 fi
 
+log -v openvpn "[health] Public IP is: $VPNIP."
 echo "Public IP: $VPNIP. ";
 
 exit 0;
