@@ -54,8 +54,8 @@ echo "$VPN_USERNAME" > /app/openvpn/auth.conf
 echo "$VPN_PASSWORD" >> /app/openvpn/auth.conf
 chmod 600 /app/openvpn/auth.conf
 
+chmod 755 /app/openvpn/$VPN_PROVIDER/update.sh
 chmod 755 /app/openvpn/$VPN_PROVIDER/configure.sh
-chmod 755 /app/openvpn/$VPN_PROVIDER/setup.sh
 chmod 755 /app/openvpn/tls-verify.sh
 chmod 755 /app/openvpn/healthcheck.sh
 chmod 755 /app/openvpn/on-up.sh
@@ -99,7 +99,7 @@ for country in $VPN_COUNTRY ; do
     #
     # Update config
     #
-    /app/openvpn/$VPN_PROVIDER/setup.sh
+    /app/openvpn/$VPN_PROVIDER/update.sh
 
     #
     # Killswitch 
@@ -128,6 +128,34 @@ for country in $VPN_COUNTRY ; do
     # Provider specific configuration
     #
     /app/openvpn/$VPN_PROVIDER/configure.sh $country
+
+    #
+    # Add user.conf path
+    #
+    sed -i 's/^auth-user-pass/auth-user-pass \/app\/openvpn\/auth.conf/g' /app/openvpn/config-$VPN_COUNTRY.ovpn
+
+    if [ -f /app/openvpn/included.remotes ]; then
+        comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/$VPN_COUNTRY-tmp.remotes
+        mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes 
+    fi
+
+    if [ -f /app/openvpn/excluded.remotes ]; then
+        comm /app/openvpn/$VPN_COUNTRY-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/$VPN_COUNTRY-tmp.remotes 
+        mv -f /app/openvpn/$VPN_COUNTRY-tmp.remotes /app/openvpn/$VPN_COUNTRY-allowed.remotes
+    fi
+
+    #
+    #  Make sure list is not too long
+    #
+    echo "$(tail -n 32 /app/openvpn/$VPN_COUNTRY-allowed.remotes)" > /app/openvpn/$VPN_COUNTRY-allowed.remotes
+
+    #
+    # Add allowed remotes as remotes
+    #
+    sed -i '/remote /d' /app/openvpn/config-$VPN_COUNTRY.ovpn
+    echo "" >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+    find /app/openvpn/ -name "$VPN_COUNTRY-allowed.remotes" -exec sed -n -e "s/^\(.*\)/remote \1 $(var VPN_PORT)/p" {} \; >> /app/openvpn/config-$VPN_COUNTRY.ovpn
+
 
     #
     # Random remote
