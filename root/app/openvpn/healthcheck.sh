@@ -13,6 +13,8 @@ VPNIP=$(wget http://api.ipify.org -O - -q 2>/dev/null)
 RC=$?
 IP=$(cat /app/openvpn/ip)
 
+log -v openvpn "[health] IP is $VPNIP"
+
 if [ $RC -eq 1 ]; then
     echo "No internet connection."
     exit 1;
