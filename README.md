@@ -11,6 +11,7 @@ Please support the development by making a small donation.
 [![Support](https://img.shields.io/badge/support-PayPal-blue)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SZ7J9JL9P5DGE&source=url)
 
 ## Features
+* Killswitch (kills network if vpn is down)
 * Connect to random server
 * Reconnects if connection breaks
 * Healthcheck (checking that ip differs from public ip)
@@ -38,6 +39,7 @@ docker run \
   -e 'VPN_USERNAME=[your vpn username]' \
   -e 'VPN_PASSWORD=[your vpn password]' \
   -e 'VPN_COUNTRY=[your desired country]' \
+  -e 'HOST_IP=[your server ip]' \
   -v /path/to/cache/folder:/cache/ \
   rundqvist/openvpn
 ```
@@ -52,9 +54,11 @@ docker run \
 | _VPN_USERNAME_ | Your VPN username. |
 | _VPN_PASSWORD_ | Your VPN password. |
 | _VPN_COUNTRY_ | ISO 3166-1 alpha-2 country code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). |
+| VPN_KILLSWITCH | Kills network if vpn is down. "true" (default) or "false". |
 | VPN_INCLUDED_REMOTES | Host names separated by one space. Restricts VPN to entered remotes. |
 | VPN_EXCLUDED_REMOTES | Host names separated by one space. VPN will not connect to entered remotes. |
-| VPN_RANDOM_REMOTE | Connects to random remote. "true" or "false". |
+| VPN_RANDOM_REMOTE | Connects to random remote. "true" or "false" (default). |
+| HOST_IP | IP of server on your local network.  |
 
 Variables in _cursive_ is mandatory.
 
