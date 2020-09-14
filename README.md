@@ -1,7 +1,10 @@
 # OpenVPN container
-A small OpenVPN container based on Alpine Linux. 
+A user friendly OpenVPN container based on Alpine Linux. 
 
 [![Docker pulls](https://img.shields.io/docker/pulls/rundqvist/openvpn.svg)](https://hub.docker.com/r/rundqvist/openvpn)
+[![image size](https://img.shields.io/docker/image-size/rundqvist/openvpn.svg)](https://hub.docker.com/r/rundqvist/openvpn)
+[![commit activity](https://img.shields.io/github/commit-activity/m/rundqvist/docker-openvpn)](https://github.com/rundqvist/docker-openvpn)
+[![last commit](https://img.shields.io/github/last-commit/rundqvist/docker-openvpn.svg)](https://github.com/rundqvist/docker-openvpn)
 
 ## Do you find this container useful? 
 Please support the development by making a small donation.
@@ -17,15 +20,16 @@ Please support the development by making a small donation.
 * Healthcheck (checking that ip differs from public ip)
 
 ## Requirements
-* A supported VPN account (currently [IPVanish](https://www.ipvanish.com/?a_bid=48f95966&a_aid=5f3eb2f0be07f) or [WeVPN](https://www.wevpn.com/aff/rundqvist))
+* A supported VPN account (currently [ipvanish](https://www.ipvanish.com/?a_bid=48f95966&a_aid=5f3eb2f0be07f) or [wevpn](https://www.wevpn.com/aff/rundqvist))
 
 [![Sign up](https://img.shields.io/badge/sign_up-IPVanish_VPN-6fbc44)](https://www.ipvanish.com/?a_bid=48f95966&a_aid=5f3eb2f0be07f)
 [![Sign up](https://img.shields.io/badge/sign_up-WeVPN-e33866)](https://www.wevpn.com/aff/rundqvist)
 
 ## Components
-* Alpine Linux
-* Supervisor container as base (https://hub.docker.com/r/rundqvist/supervisor)
-* OpenVPN (https://github.com/OpenVPN/openvpn)
+Built on [rundqvist/supervisor](https://hub.docker.com/r/rundqvist/supervisor) container.
+* [Alpine Linux](https://www.alpinelinux.org)
+* [Supervisor](https://github.com/Supervisor/supervisor)
+* [OpenVPN](https://github.com/OpenVPN/openvpn)
 
 ## Run
 ```
@@ -34,44 +38,45 @@ docker run \
   --cap-add=NET_ADMIN \
   --device=/dev/net/tun \
   --name=openvpn \
-  --dns [your desired public dns, for example 1.1.1.1] \ 
+  --dns 1.1.1.1 \ 
+  --dns 1.0.0.1 \ 
+  -e 'HOST_IP=[your server ip]' \
   -e 'VPN_PROVIDER=[your vpn provider]' \
   -e 'VPN_USERNAME=[your vpn username]' \
   -e 'VPN_PASSWORD=[your vpn password]' \
   -e 'VPN_COUNTRY=[your desired country]' \
-  -e 'HOST_IP=[your server ip]' \
   -v /path/to/cache/folder:/cache/ \
   rundqvist/openvpn
 ```
 
-## Configuration
+### Configuration
 
-### Variables
+#### Variables
 
 | Variable | Usage |
 |----------|-------|
+| HOST_IP | IP of server on your local network (needed for communication between container and local network).  |
 | _VPN_PROVIDER_ | Your VPN provider ("[ipvanish](https://www.ipvanish.com/?a_bid=48f95966&a_aid=5f3eb2f0be07f)" or "[wevpn](https://www.wevpn.com/aff/rundqvist)"). |
 | _VPN_USERNAME_ | Your VPN username. |
 | _VPN_PASSWORD_ | Your VPN password. |
 | _VPN_COUNTRY_ | ISO 3166-1 alpha-2 country code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). |
-| VPN_KILLSWITCH | Kills network if vpn is down. "true" (default) or "false". |
-| VPN_INCLUDED_REMOTES | Host names separated by one space. Restricts VPN to entered remotes. |
-| VPN_EXCLUDED_REMOTES | Host names separated by one space. VPN will not connect to entered remotes. |
-| VPN_RANDOM_REMOTE | Connects to random remote. "true" or "false" (default). |
-| HOST_IP | IP of server on your local network.  |
+| VPN_KILLSWITCH | Kills network if vpn is down. <br />`true` (default) or `false`. |
+| VPN_INCLUDED_REMOTES | Host names separated by one space. VPN will _only_ connect to entered remotes. |
+| VPN_EXCLUDED_REMOTES | Host names separated by one space. VPN will _not_ connect to entered remotes. |
+| VPN_RANDOM_REMOTE | Connects to random remote. <br />`true` or `false` (default). |
 
 Variables in _cursive_ is mandatory.
 
-### Volumes
+#### Volumes
 
 | Folder | Usage |
 |--------|-------|
-| /cache/ | Used for caching original configuration files from vpn provider |
+| /cache/ | Used for caching original configuration files from vpn provider. |
 
 ## Setup
 
 ### IPVanish
-Just enter mandatory variables and run. Container will solve configuration.
+Just enter mandatory variables and run. Container will download configuration files from IPVanish and configure container automatically.
 
 ### WeVPN
 Login to the WeVPN website and use the _Manual Configuration Generator_ to download config. Select Protocol UDP and OpenVPN version v2.4+ when creating configuration.
@@ -84,6 +89,13 @@ Put configuration files in the wevpn-folder in the structure below.
   |
   └ wevpn
 ```
+
+## Use
+Add `--net container:openvpn` (the name if this container) on other container to route all traffic via vpn.
+
+Remember to configure `HOST_IP` if you want to reach services inside the container from your local network.
+
+Also, the ports you want to reach in the other container must be configured in this container.
 
 ## Issues
 Please report issues at https://github.com/rundqvist/docker-openvpn/issues
