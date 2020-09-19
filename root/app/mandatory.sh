@@ -11,6 +11,11 @@ for var in "VPN_PROVIDER" "VPN_USERNAME" "VPN_PASSWORD" "VPN_COUNTRY" ; do
 
 done
 
+if [ ! -d "/app/openvpn/$VPN_PROVIDER" ] ; then
+    log -e openvpn "VPN provider '$VPN_PROVIDER' is not supported. See https://hub.docker.com/r/rundqvist/openvpn for supported providers."
+    exit 1;
+fi
+
 if [ "$(var abort)" = "true" ] ; then
     exit 1;
 fi

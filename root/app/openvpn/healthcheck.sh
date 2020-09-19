@@ -2,31 +2,36 @@
 
 log -v openvpn "[health] Check health"
 
-if [ -z "$(var VPN_PROVIDER)" ]; then
+VPNIP=$(wget http://api.ipify.org -T 10 -O - -q 2>/dev/null)
 
-    echo "No VPN provider specified."
-    exit 1;
-
-fi
-
-VPNIP=$(wget http://api.ipify.org -O - -q 2>/dev/null)
-RC=$?
-IP=$(cat /app/openvpn/ip)
-
-if [ $RC -eq 1 ]; then
-    echo "No internet connection."
-    exit 1;
+if [ $? -eq 1 ]; then
+    var fail + 1
+    log -e openvpn "[health] No internet connection ($(var fail))."
+    echo "No internet connection ($(var fail))."
 elif [ "$(var VPN_MULTIPLE)" = "true" ]; then
+    var -d fail
     echo "Multiple VPN. "
-elif [[ ${IP:0:1} = "1" ]]; then
-    echo "IP could not be resolved before connecting to VPN. Privacy could be compromized. Public IP is: $VPNIP."
-    exit 1;
-elif [ $RC":"$VPNIP = $IP ]; then
-	echo "Not connected to VPN. Public IP is: $VPNIP.";
-	exit 1;
+elif [ "$(var publicIp)" = "$VPNIP" ]; then
+    var fail + 1
+    log -e openvpn "[health] Not connected to VPN. Public IP is: $VPNIP ($(var fail)).";
+	echo "Not connected to VPN. Public IP is: $VPNIP ($(var fail)).";
+else
+    var -d fail
+    log -v openvpn "[health] VPN IP is: $VPNIP."
+    echo "VPN IP: $VPNIP. ";
 fi
 
-log -v openvpn "[health] Public IP is: $VPNIP."
-echo "Public IP: $VPNIP. ";
+if [ "$(var fail)" = "3" ]
+then
+    var -d fail
+    country=$(var VPN_COUNTRY)
+    log -i openvpn "Restarting VPN."
+    pid=$(ps -o pid,args | sed -n "/openvpn\/config-$country/p" | awk '{print $1}')
 
-exit 0;
+    kill -s SIGHUP $pid
+
+elif [ -z "$(var fail)" ]; then
+    exit 0;
+fi
+
+exit 1;

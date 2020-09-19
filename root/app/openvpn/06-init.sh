@@ -1,6 +1,5 @@
 #!/bin/sh
 
-ERR=0
 VPN_PROVIDER=$(var VPN_PROVIDER)
 VPN_USERNAME=$(var VPN_USERNAME)
 VPN_PASSWORD=$(var VPN_PASSWORD)
@@ -9,43 +8,18 @@ VPN_RANDOM_REMOTE=$(var VPN_RANDOM_REMOTE)
 VPN_INCLUDED_REMOTES=$(var VPN_INCLUDED_REMOTES)
 VPN_EXCLUDED_REMOTES=$(var VPN_EXCLUDED_REMOTES)
 
-if [ -z "$VPN_PROVIDER" ] ; then
-    log -w openvpn "VPN_PROVIDER is empty. No VPN is configured."
-    exit 0;
-elif [ ! -d "/app/openvpn/$VPN_PROVIDER" ] ; then
-    log -e openvpn "VPN provider '$VPN_PROVIDER' is not supported. See https://hub.docker.com/r/rundqvist/openvpn for supported providers."
-    exit 1;
-fi
-
-if [ -z "$VPN_USERNAME" ] ; then
-    log -e openvpn "VPN_USERNAME is empty."
-    ERR=1;
-fi
-if [ -z "$VPN_PASSWORD" ] ; then
-    log -e openvpn "VPN_PASSWORD is empty."
-    ERR=1;
-fi
-if [ -z "$VPN_COUNTRY" ] ; then
-    log -e openvpn "VPN_COUNTRY is empty."
-    ERR=1;
-fi
-
-if [ $ERR = 1 ] ; then
-    exit 1;
-fi
-
 #
 # Store host ip before starting vpn
 #
-IP=$(wget http://api.ipify.org -O - -q 2>/dev/null)
-RC=$?
-if [ $RC = 1 ] ; then
+publicIp=$(wget http://api.ipify.org -T 10 -O - -q 2>/dev/null)
+
+if [ $? -eq 1 ] ; then
     log -e openvpn "Could not resolve IP."
     exit 1;
 fi
 
-log -i openvpn "Public IP is: $IP"
-echo $RC":"$IP > /app/openvpn/ip
+log -i openvpn "Public IP is: $publicIp"
+var publicIp "$publicIp"
 
 #
 # Create auth file

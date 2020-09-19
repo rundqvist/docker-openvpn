@@ -4,9 +4,9 @@ LABEL maintainer="mattias.rundqvist@icloud.com"
 
 WORKDIR /app
 
-COPY root /
-
 RUN apk add --update --no-cache openvpn
+
+COPY root /
 
 ENV VPN_PROVIDER='' \
     VPN_USERNAME='' \
@@ -16,5 +16,3 @@ ENV VPN_PROVIDER='' \
 	VPN_EXCLUDED_REMOTES='' \
 	VPN_RANDOM_REMOTE='' \
 	VPN_KILLSWITCH='true'
-
-EXPOSE 80 443
