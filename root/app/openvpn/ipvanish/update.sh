@@ -7,14 +7,14 @@ DATE_UPDATED=$(cat /cache/openvpn/ipvanish/date_updated 2>/dev/null)
 
 if [ "$DATE_CURRENT" != "$DATE_UPDATED" ]; then
 
-    log -i openvpn "Downloading new config."
+    log -i openvpn "Updating config."
 
     mkdir -p /cache/openvpn/ipvanish
     rm -f /cache/openvpn/ipvanish/configs.zip
 
     wget -q https://www.ipvanish.com/software/configs/configs.zip -P /cache/openvpn/ipvanish/ 2>/dev/null
-    RC=$?
-    if [ $RC -eq 1 ]; then
+    
+    if [ $? -eq 1 ]; then
         log -w openvpn "Download failed. "
     else
 
@@ -24,7 +24,7 @@ if [ "$DATE_CURRENT" != "$DATE_UPDATED" ]; then
         echo $DATE_CURRENT > /cache/openvpn/ipvanish/date_updated
     fi
 else
-    log -i openvpn "Config recently updated. Skipping..."
+    log -d openvpn "Config recently updated. Skipping..."
 fi
 
 if [ ! -f /app/openvpn/ca.ipvanish.com.crt ] ; then

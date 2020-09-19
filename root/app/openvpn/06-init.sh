@@ -107,6 +107,16 @@ for country in $VPN_COUNTRY ; do
     #
     /app/openvpn/$VPN_PROVIDER/configure.sh $country
 
+    if [ $? -eq 1 ]
+    then
+        if [ "$(var VPN_MULTIPLE)" = "true" ]
+        then
+            continue
+        else
+            exit 1;
+        fi
+    fi
+
     #
     # Add user.conf path
     #

@@ -37,10 +37,8 @@ for filepath in $EVENTS ; do
     #
     # Check outcome
     #
-    RC=$?
-
-    if [ $RC -eq 1 ]; then
-        log -e openvpn "$filepath $COUNTRY $TUN $IP failed";
+    if [ $? -eq 1 ]; then
+        log -d openvpn "$filepath $COUNTRY $TUN $IP failed";
         exit 1;
     fi
 done

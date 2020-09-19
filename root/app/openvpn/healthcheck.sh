@@ -9,7 +9,7 @@ if [ $? -eq 1 ]; then
     log -e openvpn "[health] No internet connection ($(var fail))."
     echo "No internet connection ($(var fail))."
 elif [ "$(var VPN_MULTIPLE)" = "true" ]; then
-    var -d fail
+    var -v fail
     echo "Multiple VPN. "
 elif [ "$(var publicIp)" = "$VPNIP" ]; then
     var fail + 1
@@ -25,7 +25,7 @@ if [ "$(var fail)" = "3" ]
 then
     var -d fail
     country=$(var VPN_COUNTRY)
-    log -i openvpn "Restarting VPN."
+    log -i openvpn "[health] Restarting VPN."
     pid=$(ps -o pid,args | sed -n "/openvpn\/config-$country/p" | awk '{print $1}')
 
     kill -s SIGHUP $pid
