@@ -2,42 +2,65 @@
 
 if [ "$(var VPN_MULTIPLE)" = "true" ]
 then
-    log -v openvpn "[health] Health check (Multiple VPN)."
-    echo "Multiple VPN. "
+    log -v openvpn "Multiple vpn configured, skipping health check."
+    echo "Multiple vpn. "
     exit 0;
 fi
 
-log -v openvpn "[health] Check health"
+country=$(var VPN_COUNTRY)
+ip=$(wget http://api.ipify.org -T 15 -O - -q 2>/dev/null)
+rc=$?
 
-VPNIP=$(wget http://api.ipify.org -T 10 -O - -q 2>/dev/null)
+#
+# Check if vpn is healthy.
+#
+if [ $rc -eq 0 ] && [ ! -z "$ip" ] && [ "$(var publicIp)" != "$ip" ]
+then
+    level="-v"
+    if [ "$(var -k vpn.$country ip)" != "$ip" ]
+    then
+        level="-i"
+    fi
+    
+    msg="Vpn ($country) ip: $ip"
+    log $level openvpn "$msg."
+    echo $msg
 
-if [ $? -eq 1 ]
-then
-    var openvpn.fail + 1
-    log -e openvpn "[health] No internet connection ($(var openvpn.fail))."
-    echo "No internet connection ($(var openvpn.fail))."
-elif [ "$(var publicIp)" = "$VPNIP" ]
-then
-    var openvpn.fail + 1
-    log -e openvpn "[health] Not connected to VPN. Public IP is: $VPNIP ($(var openvpn.fail)).";
-	echo "Not connected to VPN. Public IP is: $VPNIP ($(var openvpn.fail)).";
-else
-    var -d openvpn.fail
-    log -v openvpn "[health] VPN IP is: $VPNIP."
-    echo "VPN IP: $VPNIP. ";
+    var -k vpn.$country -d fail
+    var -k vpn.$country ip "$ip"
+
+    exit 0;
 fi
 
-if [ "$(var openvpn.fail)" = "3" ]
+#
+# VPN is unhealthy
+#
+var -k vpn.$country fail + 1
+var -k vpn.$country -d ip
+publicIp="$(var publicIp)"
+
+if [ $rc -eq 1 ] || [ -z "$ip" ]
 then
-    var -d openvpn.fail
-    country=$(var VPN_COUNTRY)
-    log -i openvpn "[health] Restarting VPN."
+    msg="Vpn ($country) ip check timed out"
+elif [ "$publicIp" = "$ip" ]
+then
+    msg="Not connected to vpn ($country). Public ip: $ip";
+else
+    msg="Unknown error (rc: $rc, publicIp: $publicIp, vpnIp: $ip, country: $country)"
+fi
+
+count="$(var -k vpn.$country fail)"
+log -e openvpn "$msg ($count)."
+echo "$msg"
+
+if [ "$count" == "3" ]
+then
+    var -k vpn.$country -d fail
+    
+    log -i openvpn "Restarting vpn ($country)."
     pid=$(ps -o pid,args | sed -n "/openvpn\/config-$country/p" | awk '{print $1}')
 
     kill -s SIGHUP $pid
-
-elif [ -z "$(var openvpn.fail)" ]; then
-    exit 0;
 fi
 
 exit 1;

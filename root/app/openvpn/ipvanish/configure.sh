@@ -6,7 +6,7 @@ IPVANISH_COUNTRY=$1
 if [ "$VPN_COUNTRY" = "GB" ] ; then
     IPVANISH_COUNTRY="UK";
 
-    log -d openvpn "Parsing config files for 'UK' instead of 'GB' since IPVanish differs from ISO 3166-1 alpha-2"
+    log -d openvpn "Parsing config files for 'UK' instead of 'GB' since IPVanish differs from ISO 3166-1 alpha-2."
 fi
 
 if [ -z "$(find /cache/openvpn/ipvanish/ -name "*-$IPVANISH_COUNTRY-*")" ] ; then

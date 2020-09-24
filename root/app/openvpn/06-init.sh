@@ -11,14 +11,14 @@ VPN_EXCLUDED_REMOTES=$(var VPN_EXCLUDED_REMOTES)
 #
 # Store host ip before starting vpn
 #
-publicIp=$(wget http://api.ipify.org -T 10 -O - -q 2>/dev/null)
+publicIp=$(wget http://api.ipify.org -T 15 -O - -q 2>/dev/null)
 
-if [ $? -eq 1 ] ; then
-    log -e openvpn "Could not resolve IP."
+if [ $? -eq 1 ] || [ -z "$publicIp" ]; then
+    log -e openvpn "Could not resolve public ip."
     exit 1;
 fi
 
-log -i openvpn "Public IP is: $publicIp"
+log -i openvpn "Public ip is: $publicIp."
 var publicIp "$publicIp"
 
 #
@@ -46,7 +46,7 @@ if [ "$VPN_INCLUDED_REMOTES" != "" ]; then
 
     for s in $VPN_INCLUDED_REMOTES ; do
         echo $s
-        log -d openvpn "Included remote: $s"
+        log -d openvpn "Included remote: $s."
     done | sort > /app/openvpn/included.remotes
 fi
 
@@ -54,7 +54,7 @@ if [ "$VPN_EXCLUDED_REMOTES" != "" ]; then
 
     for s in $VPN_EXCLUDED_REMOTES ; do
         echo $s
-        log -d openvpn "Excluded remote: $s"
+        log -d openvpn "Excluded remote: $s."
     done | sort > /app/openvpn/excluded.remotes  
 fi
 
@@ -68,7 +68,7 @@ for country in $VPN_COUNTRY ; do
         country="GB";
     fi
 
-    log -i openvpn "Configuring $VPN_PROVIDER with '$country' tunnel"
+    log -i openvpn "Creating $VPN_PROVIDER $country vpn."
     
     #
     # Update config
@@ -80,7 +80,7 @@ for country in $VPN_COUNTRY ; do
     #
     if [ "$(var VPN_MULTIPLE)" = "true" ] ; then
         if [ "$(var VPN_KILLSWITCH)" = "true" ] ; then
-            log -i openvpn "Killswitch not possible with multiple VPN configured. Disabling."
+            log -i openvpn "Killswitch not possible with multiple vpn configured. Disabling."
             var VPN_KILLSWITCH false
         fi
     else
@@ -161,7 +161,7 @@ for country in $VPN_COUNTRY ; do
     else
         sed "s/{VPN_COUNTRY}/$country/g" /app/openvpn/supervisord.template.conf >> /app/openvpn/supervisord.conf
         for remote in $(cat /app/openvpn/$country-allowed.remotes) ; do
-            log -v openvpn "Allowed remote ($country): $remote"
+            log -v openvpn "Allowed remote ($country): $remote."
         done
     fi
 done

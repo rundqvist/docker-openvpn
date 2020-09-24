@@ -4,10 +4,13 @@ COUNTRY=$1
 TUN=$2
 IP=$5
 
-log -w openvpn "Country: $COUNTRY is down."
+var -k vpn.$COUNTRY -d fail
+var -k vpn.$COUNTRY -d ip
+
+log -w openvpn "Vpn ($COUNTRY) is down."
 
 if [ "$(var VPN_KILLSWITCH)" = "true" ] ; then
-    log -d openvpn "Applying killswitch config (since VPN is down)."
+    log -d openvpn "Applying killswitch config (since vpn is down)."
 
     iptables -P OUTPUT DROP
     iptables -A OUTPUT -p udp -m udp --dport $(var VPN_PORT) -j ACCEPT
@@ -30,7 +33,7 @@ for filepath in $EVENTS ; do
     #
     # Ensure execution rights and execute file
     #
-    log -d openvpn "Executing $filepath $COUNTRY $TUN $IP"
+    log -d openvpn "Executing $filepath $COUNTRY $TUN $IP."
     chmod +x $filepath    
     $filepath $COUNTRY $TUN $IP
 
@@ -38,7 +41,7 @@ for filepath in $EVENTS ; do
     # Check outcome
     #
     if [ $? -eq 1 ]; then
-        log -d openvpn "$filepath $COUNTRY $TUN $IP failed";
+        log -d openvpn "$filepath $COUNTRY $TUN $IP failed.";
         exit 1;
     fi
 done
