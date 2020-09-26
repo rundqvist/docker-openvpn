@@ -38,7 +38,7 @@ chmod 755 /app/openvpn/on-down.sh
 > /app/openvpn/supervisord.conf
 
 if [ $(echo $VPN_COUNTRY | wc -w) -gt 1 ] ; then
-    log -i openvpn "Configuring multiple vpn."
+    log -d openvpn "Configuring multiple vpn."
     var VPN_MULTIPLE true
 fi
 
