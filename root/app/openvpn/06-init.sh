@@ -37,29 +37,40 @@ chmod 755 /app/openvpn/on-down.sh
 
 > /app/openvpn/supervisord.conf
 
-if [ $(echo $VPN_COUNTRY | wc -w) -gt 1 ] ; then
+if [ $(echo $VPN_COUNTRY | wc -w) -gt 1 ]
+then
     log -d openvpn "Configuring multiple vpn."
     var VPN_MULTIPLE true
 fi
 
-if [ "$VPN_INCLUDED_REMOTES" != "" ]; then
-
-    for s in $VPN_INCLUDED_REMOTES ; do
+if [ "$VPN_INCLUDED_REMOTES" != "" ]
+then
+    for s in $VPN_INCLUDED_REMOTES
+    do
         echo $s
         log -d openvpn "Included remote: $s."
     done | sort > /app/openvpn/included.remotes
 fi
 
-if [ "$VPN_EXCLUDED_REMOTES" != "" ]; then
-
-    for s in $VPN_EXCLUDED_REMOTES ; do
+if [ "$VPN_EXCLUDED_REMOTES" != "" ]
+then
+    for s in $VPN_EXCLUDED_REMOTES
+    do
         echo $s
         log -d openvpn "Excluded remote: $s."
     done | sort > /app/openvpn/excluded.remotes  
 fi
+    
+#
+# Update config
+#
+/app/openvpn/$VPN_PROVIDER/update.sh
 
-for country in $VPN_COUNTRY ; do
-
+#
+# Setup vpn
+#
+for country in $VPN_COUNTRY
+do
     #
     # Translate VPN_COUNTRY to ISO 3166-1 alpha-2 to avoid easily fixed common mistakes
     #
@@ -69,11 +80,6 @@ for country in $VPN_COUNTRY ; do
     fi
 
     log -i openvpn "Creating $VPN_PROVIDER $country vpn."
-    
-    #
-    # Update config
-    #
-    /app/openvpn/$VPN_PROVIDER/update.sh
 
     #
     # Killswitch 
