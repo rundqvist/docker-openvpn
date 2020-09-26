@@ -67,6 +67,32 @@ fi
 /app/openvpn/$VPN_PROVIDER/update.sh
 
 #
+# Killswitch 
+#
+if [ "$(var VPN_MULTIPLE)" == "true" ] && [ "$(var VPN_KILLSWITCH)" == "true" ]
+then
+    log -i openvpn "Killswitch not possible with multiple vpn configured. Disabling."
+    var VPN_KILLSWITCH false
+elif [ "$(var VPN_KILLSWITCH)" == "true" ]
+then
+    log -i openvpn "Killswitch enabled."
+
+    iptables -P OUTPUT DROP
+    iptables -A OUTPUT -p udp -m udp --dport $(var VPN_PORT) -j ACCEPT
+    iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    iptables -A OUTPUT -o tun0 -j ACCEPT
+    NS=$(cat /etc/resolv.conf | grep "nameserver" | sed 's/nameserver \(.*\)/\1/g')
+
+    for s in $NS
+    do
+        iptables -A OUTPUT -d $s -j ACCEPT
+    done
+elif [ "$(var VPN_MULTIPLE)" != "true" ]
+then
+    log -w openvpn "Killswitch disabled."        
+fi
+
+#
 # Setup vpn
 #
 for country in $VPN_COUNTRY
@@ -74,39 +100,13 @@ do
     #
     # Translate VPN_COUNTRY to ISO 3166-1 alpha-2 to avoid easily fixed common mistakes
     #
-    if [ "$country" = "UK" ] ; then
+    if [ "$country" = "UK" ]
+    then
         log -i openvpn "Country 'UK' is not ISO 3166-1 alpha-2. Translating to 'GB'."
         country="GB";
     fi
 
     log -i openvpn "Creating $VPN_PROVIDER $country vpn."
-
-    #
-    # Killswitch 
-    #
-    if [ "$(var VPN_MULTIPLE)" = "true" ] ; then
-        if [ "$(var VPN_KILLSWITCH)" = "true" ] ; then
-            log -i openvpn "Killswitch not possible with multiple vpn configured. Disabling."
-            var VPN_KILLSWITCH false
-        fi
-    else
-        if [ "$(var VPN_KILLSWITCH)" = "true" ] ; then
-
-            log -i openvpn "Killswitch enabled."
-
-            iptables -P OUTPUT DROP
-            iptables -A OUTPUT -p udp -m udp --dport $(var VPN_PORT) -j ACCEPT
-            iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-            iptables -A OUTPUT -o tun0 -j ACCEPT
-            NS=$(cat /etc/resolv.conf | grep "nameserver" | sed 's/nameserver \(.*\)/\1/g')
-
-            for s in $NS; do
-                iptables -A OUTPUT -d $s -j ACCEPT
-            done
-        else
-            log -w openvpn "Killswitch disabled."        
-        fi
-    fi
 
     #
     # Provider specific configuration
@@ -115,10 +115,13 @@ do
 
     if [ $? -eq 1 ]
     then
-        if [ "$(var VPN_MULTIPLE)" = "true" ]
+        log -e openvpn "Failed to create $country vpn."
+        if [ "$(var VPN_MULTIPLE)" == "true" ]
         then
+            # Multiple vpn requested. Continue to setup the others.
             continue
         else
+            # Single vpn requested, and it failed. No point starting container.
             exit 1;
         fi
     fi
