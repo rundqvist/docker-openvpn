@@ -8,7 +8,7 @@ then
 fi
 
 country=$(var VPN_COUNTRY)
-ip=$(wget http://api.ipify.org -T 15 -O - -q 2>/dev/null)
+ip=$(echoip -f https)
 rc=$?
 
 #

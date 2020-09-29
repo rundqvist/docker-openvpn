@@ -11,7 +11,7 @@ VPN_EXCLUDED_REMOTES=$(var VPN_EXCLUDED_REMOTES)
 #
 # Store host ip before starting vpn
 #
-publicIp=$(wget http://api.ipify.org -T 15 -O - -q 2>/dev/null)
+publicIp=$(echoip -f https)
 
 if [ $? -eq 1 ] || [ -z "$publicIp" ]; then
     log -e openvpn "Could not resolve public ip."
