@@ -28,8 +28,7 @@ echo "$VPN_USERNAME" > /app/openvpn/auth.conf
 echo "$VPN_PASSWORD" >> /app/openvpn/auth.conf
 chmod 600 /app/openvpn/auth.conf
 
-chmod 755 /app/openvpn/$VPN_PROVIDER/update.sh
-chmod 755 /app/openvpn/$VPN_PROVIDER/configure.sh
+chmod 755 /app/openvpn/provider/$VPN_PROVIDER.sh
 chmod 755 /app/openvpn/tls-verify.sh
 chmod 755 /app/openvpn/healthcheck.sh
 chmod 755 /app/openvpn/on-up.sh
@@ -64,7 +63,8 @@ fi
 #
 # Update config
 #
-/app/openvpn/$VPN_PROVIDER/update.sh
+/app/openvpn/provider/$VPN_PROVIDER.sh -e configure
+/app/openvpn/provider/$VPN_PROVIDER.sh -e update
 
 #
 # Killswitch 
@@ -111,7 +111,7 @@ do
     #
     # Provider specific configuration
     #
-    /app/openvpn/$VPN_PROVIDER/configure.sh $country
+    /app/openvpn/provider/$VPN_PROVIDER.sh -e setup -c $country
 
     if [ $? -eq 1 ]
     then

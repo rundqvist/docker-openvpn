@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ ! -d "/app/openvpn/$VPN_PROVIDER" ]
+if [ ! -f "/app/openvpn/provider/$VPN_PROVIDER.sh" ]
 then
     log -e openvpn "VPN provider '$VPN_PROVIDER' is not supported. See https://hub.docker.com/r/rundqvist/openvpn for supported providers."
     exit 1;

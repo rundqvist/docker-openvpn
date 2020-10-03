@@ -9,8 +9,9 @@ var -k vpn.$COUNTRY -d ip
 
 log -w openvpn "Vpn ($COUNTRY) is down."
 
-if [ "$(var VPN_KILLSWITCH)" = "true" ] ; then
-    log -d openvpn "Applying killswitch config (since vpn is down)."
+if [ "$(var VPN_KILLSWITCH)" = "true" ]
+then
+    log -d openvpn "Applying killswitch config."
 
     iptables -P OUTPUT DROP
     iptables -A OUTPUT -p udp -m udp --dport $(var VPN_PORT) -j ACCEPT
@@ -18,7 +19,8 @@ if [ "$(var VPN_KILLSWITCH)" = "true" ] ; then
     iptables -A OUTPUT -o tun0 -j ACCEPT
     NS=$(cat /etc/resolv.conf | grep "nameserver" | sed 's/nameserver \(.*\)/\1/g')
 
-    for s in $NS; do
+    for s in $NS
+    do
         iptables -A OUTPUT -d $s -j ACCEPT
     done
 fi
@@ -28,8 +30,8 @@ fi
 #
 EVENTS=$(find /app/*/ -type f -name on-openvpn-down.sh)
 
-for filepath in $EVENTS ; do
-
+for filepath in $EVENTS
+do
     #
     # Ensure execution rights and execute file
     #
@@ -40,7 +42,8 @@ for filepath in $EVENTS ; do
     #
     # Check outcome
     #
-    if [ $? -eq 1 ]; then
+    if [ $? -eq 1 ]
+    then
         log -d openvpn "$filepath $COUNTRY $TUN $IP failed.";
         exit 1;
     fi
