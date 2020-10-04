@@ -131,13 +131,38 @@ do
     #
     sed -i 's/^auth-user-pass/auth-user-pass \/app\/openvpn\/auth.conf/g' /app/openvpn/config-$country.ovpn
 
-    if [ -f /app/openvpn/included.remotes ]; then
+    #
+    # Filter remotes
+    #
+    if [ -f /app/openvpn/included.remotes ] && [ -s /app/openvpn/$country-allowed.remotes ]
+    then
         comm /app/openvpn/$country-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/$country-tmp.remotes
+        if [ ! -s /app/openvpn/$country-tmp.remotes ]
+        then
+            if [ "$(var VPN_REMOTES_FILTER_MODE)" == "strict" ] || [ "$(var VPN_REMOTES_FILTER_MODE)" == "strict-included" ]
+            then
+                log -w "Included remotes filtering left country $country with an empty list."
+            else
+                log -d "Included remotes filtering left country $country with an empty list. Allowing all since non-strict behaviour."
+                cp -f /app/openvpn/$country-allowed.remotes /app/openvpn/$country-tmp.remotes
+            fi
+        fi
         mv -f /app/openvpn/$country-tmp.remotes /app/openvpn/$country-allowed.remotes 
     fi
 
-    if [ -f /app/openvpn/excluded.remotes ]; then
-        comm /app/openvpn/$country-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/$country-tmp.remotes 
+    if [ -f /app/openvpn/excluded.remotes ] && [ -s /app/openvpn/$country-allowed.remotes ]
+    then
+        comm /app/openvpn/$country-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/$country-tmp.remotes
+        if [ ! -s /app/openvpn/$country-tmp.remotes ]
+        then
+            if [ "$(var VPN_REMOTES_FILTER_MODE)" == "strict" ] || [ "$(var VPN_REMOTES_FILTER_MODE)" == "strict-excluded" ]
+            then
+                log -w "Excluded remotes filtering left country $country with an empty list."
+            else
+                log -d "Excluded remotes filtering left country $country with an empty list. Allowing all (or included) since non-strict behaviour."
+                cp -f /app/openvpn/$country-allowed.remotes /app/openvpn/$country-tmp.remotes
+            fi
+        fi
         mv -f /app/openvpn/$country-tmp.remotes /app/openvpn/$country-allowed.remotes
     fi
 
@@ -166,7 +191,7 @@ do
     fi
 
     if [ -z "$(cat /app/openvpn/$country-allowed.remotes)" ] ; then
-        log -e openvpn "Country $country has no remotes. "
+        log -e openvpn "Country $country has no remotes. Cannot connect."
     else
         sed "s/{VPN_COUNTRY}/$country/g" /app/openvpn/supervisord.template.conf >> /app/openvpn/supervisord.conf
         for remote in $(cat /app/openvpn/$country-allowed.remotes) ; do
