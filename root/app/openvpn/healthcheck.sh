@@ -2,7 +2,7 @@
 
 if [ "$(var VPN_MULTIPLE)" = "true" ]
 then
-    log -v openvpn "Multiple vpn configured, skipping health check."
+    log -v "Multiple vpn configured, skipping health check."
     echo "Multiple vpn. "
     exit 0;
 fi
@@ -50,14 +50,14 @@ else
 fi
 
 count="$(var -k vpn.$country fail)"
-log -e openvpn "$msg ($count)."
+log -e "$msg ($count)."
 echo "$msg"
 
 if [ "$count" == "3" ]
 then
     var -k vpn.$country -d fail
     
-    log -i openvpn "Restarting vpn ($country)."
+    log -i "Restarting vpn ($country)."
     pid=$(ps -o pid,args | sed -n "/openvpn\/config-$country/p" | awk '{print $1}')
 
     kill -s SIGHUP $pid

@@ -7,7 +7,7 @@ while getopts ":e:c:" arg; do
     esac
 done
 
-log -v openvpn "Provider wevpn $exec"
+log -v "Provider wevpn $exec"
 
 case $exec in
 
@@ -27,13 +27,13 @@ case $exec in
 
         ip=$(tac /var/log/openvpn-$country.log | grep -m 1 'Peer Connection Initiated' | grep -oE '([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})')
 
-        log -v openvpn "Vpn ($country) connected to ip: $ip"
+        log -v "Vpn ($country) connected to ip: $ip"
 
         while read -r remote
         do
             remoteIp=$(ping -q -c 1 $remote | head -n 1 | grep -oE '([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})')
 
-            log -v openvpn "Host $remote has ip $remoteIp"
+            log -v "Host $remote has ip $remoteIp"
 
             if [ "$ip" == "$remoteIp" ]
             then
@@ -43,7 +43,7 @@ case $exec in
 
         if [ -z "$remote" ]
         then
-            log -w openvpn "Failed to resolve remote hostname."
+            log -w "Failed to resolve remote hostname."
             exit 1;
         fi
 
@@ -57,7 +57,7 @@ case $exec in
     setup)
 
         if [ -z "$(find /cache/openvpn/wevpn/ -name "$country\_*")" ] ; then
-            log -e openvpn "No config files found country $country. Ignoring. "
+            log -e "No config files found country $country. Ignoring. "
             exit 1;
         fi
 
@@ -78,7 +78,7 @@ case $exec in
     #
     update)
     
-        log -w openvpn "Provider does not support auto update."
+        log -w "Provider does not support auto update."
 
     ;;
 esac

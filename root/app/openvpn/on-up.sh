@@ -7,7 +7,7 @@ IP=$5
 
 if [ "$(var VPN_KILLSWITCH)" = "true" ]
 then
-    log -d openvpn "Removing killswitch config."
+    log -d "Removing killswitch config."
 
     iptables -P OUTPUT ACCEPT
     iptables -D OUTPUT -p udp -m udp --dport $(var VPN_PORT) -j ACCEPT
@@ -23,7 +23,7 @@ fi
 
 host=$(/app/openvpn/provider/$provider.sh -e host -c $COUNTRY)
 
-log -i openvpn "Vpn ($COUNTRY) is up. Connected remote: $host."
+log -i "Vpn ($COUNTRY) is up. Connected remote: $host."
 
 #
 # Find all on-openvpn-up.sh files
@@ -35,7 +35,7 @@ do
     #
     # Ensure execution rights and execute file
     #
-    log -v openvpn "Executing $filepath $COUNTRY $TUN $IP."
+    log -v "Executing $filepath $COUNTRY $TUN $IP."
     chmod +x $filepath    
     $filepath $COUNTRY $TUN $IP
 
@@ -44,7 +44,7 @@ do
     #
     if [ $? -eq 1 ]
     then
-        log -d openvpn "$filepath $COUNTRY $TUN $IP failed.";
+        log -d "$filepath $COUNTRY $TUN $IP failed.";
         exit 1;
     fi
 done
