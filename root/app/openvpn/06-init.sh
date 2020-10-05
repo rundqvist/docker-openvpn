@@ -14,11 +14,11 @@ VPN_EXCLUDED_REMOTES=$(var VPN_EXCLUDED_REMOTES)
 publicIp=$(echoip -f https)
 
 if [ $? -eq 1 ] || [ -z "$publicIp" ]; then
-    log -e openvpn "Could not resolve public ip."
+    log -e "Could not resolve public ip."
     exit 1;
 fi
 
-log -i openvpn "Public ip is: $publicIp."
+log -i "Public ip is: $publicIp."
 var publicIp "$publicIp"
 
 #
@@ -38,7 +38,7 @@ chmod 755 /app/openvpn/on-down.sh
 
 if [ $(echo $VPN_COUNTRY | wc -w) -gt 1 ]
 then
-    log -d openvpn "Configuring multiple vpn."
+    log -d "Configuring multiple vpn."
     var VPN_MULTIPLE true
 fi
 
@@ -47,7 +47,7 @@ then
     for s in $VPN_INCLUDED_REMOTES
     do
         echo $s
-        log -d openvpn "Included remote: $s."
+        log -d "Included remote: $s."
     done | sort > /app/openvpn/included.remotes
 fi
 
@@ -56,7 +56,7 @@ then
     for s in $VPN_EXCLUDED_REMOTES
     do
         echo $s
-        log -d openvpn "Excluded remote: $s."
+        log -d "Excluded remote: $s."
     done | sort > /app/openvpn/excluded.remotes  
 fi
     
@@ -71,11 +71,11 @@ fi
 #
 if [ "$(var VPN_MULTIPLE)" == "true" ] && [ "$(var VPN_KILLSWITCH)" == "true" ]
 then
-    log -i openvpn "Killswitch not possible with multiple vpn configured. Disabling."
+    log -i "Killswitch not possible with multiple vpn configured. Disabling."
     var VPN_KILLSWITCH false
 elif [ "$(var VPN_KILLSWITCH)" == "true" ]
 then
-    log -i openvpn "Killswitch enabled."
+    log -i "Killswitch enabled."
 
     iptables -P OUTPUT DROP
     iptables -A OUTPUT -p udp -m udp --dport $(var VPN_PORT) -j ACCEPT
@@ -89,7 +89,7 @@ then
     done
 elif [ "$(var VPN_MULTIPLE)" != "true" ]
 then
-    log -w openvpn "Killswitch disabled."        
+    log -w "Killswitch disabled."        
 fi
 
 #
@@ -102,11 +102,11 @@ do
     #
     if [ "$country" = "UK" ]
     then
-        log -i openvpn "Country 'UK' is not ISO 3166-1 alpha-2. Translating to 'GB'."
+        log -i "Country 'UK' is not ISO 3166-1 alpha-2. Translating to 'GB'."
         country="GB";
     fi
 
-    log -i openvpn "Creating $VPN_PROVIDER $country vpn."
+    log -i "Creating $VPN_PROVIDER $country vpn."
 
     #
     # Provider specific configuration
@@ -115,7 +115,7 @@ do
 
     if [ $? -eq 1 ]
     then
-        log -e openvpn "Failed to create $country vpn."
+        log -e "Failed to create $country vpn."
         if [ "$(var VPN_MULTIPLE)" == "true" ]
         then
             # Multiple vpn requested. Continue to setup the others.
@@ -131,13 +131,38 @@ do
     #
     sed -i 's/^auth-user-pass/auth-user-pass \/app\/openvpn\/auth.conf/g' /app/openvpn/config-$country.ovpn
 
-    if [ -f /app/openvpn/included.remotes ]; then
+    #
+    # Filter remotes
+    #
+    if [ -f /app/openvpn/included.remotes ] && [ -s /app/openvpn/$country-allowed.remotes ]
+    then
         comm /app/openvpn/$country-allowed.remotes /app/openvpn/included.remotes -12 > /app/openvpn/$country-tmp.remotes
+        if [ ! -s /app/openvpn/$country-tmp.remotes ]
+        then
+            if [ "$(var VPN_REMOTES_FILTER_MODE)" == "strict" ] || [ "$(var VPN_REMOTES_FILTER_MODE)" == "strict-included" ]
+            then
+                log -w "Included remotes filtering left country $country with an empty list."
+            else
+                log -d "Included remotes filtering left country $country with an empty list. Allowing all since non-strict behaviour."
+                cp -f /app/openvpn/$country-allowed.remotes /app/openvpn/$country-tmp.remotes
+            fi
+        fi
         mv -f /app/openvpn/$country-tmp.remotes /app/openvpn/$country-allowed.remotes 
     fi
 
-    if [ -f /app/openvpn/excluded.remotes ]; then
-        comm /app/openvpn/$country-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/$country-tmp.remotes 
+    if [ -f /app/openvpn/excluded.remotes ] && [ -s /app/openvpn/$country-allowed.remotes ]
+    then
+        comm /app/openvpn/$country-allowed.remotes /app/openvpn/excluded.remotes -23 > /app/openvpn/$country-tmp.remotes
+        if [ ! -s /app/openvpn/$country-tmp.remotes ]
+        then
+            if [ "$(var VPN_REMOTES_FILTER_MODE)" == "strict" ] || [ "$(var VPN_REMOTES_FILTER_MODE)" == "strict-excluded" ]
+            then
+                log -w "Excluded remotes filtering left country $country with an empty list."
+            else
+                log -d "Excluded remotes filtering left country $country with an empty list. Allowing all (or included) since non-strict behaviour."
+                cp -f /app/openvpn/$country-allowed.remotes /app/openvpn/$country-tmp.remotes
+            fi
+        fi
         mv -f /app/openvpn/$country-tmp.remotes /app/openvpn/$country-allowed.remotes
     fi
 
@@ -157,20 +182,32 @@ do
     #
     # Random remote
     #
-    if [ "$VPN_RANDOM_REMOTE" = "true" ]; then
+    if [ "$VPN_RANDOM_REMOTE" = "true" ]
+    then
         echo 'remote-random' >> /app/openvpn/config-$country.ovpn
     fi
 
-    if [ "$(var VPN_MULTIPLE)" = "true" ]; then
+    if [ "$(var VPN_MULTIPLE)" = "true" ]
+    then
         echo 'route-noexec' >> /app/openvpn/config-$country.ovpn
     fi
 
-    if [ -z "$(cat /app/openvpn/$country-allowed.remotes)" ] ; then
-        log -e openvpn "Country $country has no remotes. "
+    if [ -z "$(cat /app/openvpn/$country-allowed.remotes)" ]
+    then
+        log -e "Country $country has no remotes. Cannot connect."
     else
+        var -a vpn.configured -v $country
         sed "s/{VPN_COUNTRY}/$country/g" /app/openvpn/supervisord.template.conf >> /app/openvpn/supervisord.conf
-        for remote in $(cat /app/openvpn/$country-allowed.remotes) ; do
-            log -v openvpn "Allowed remote ($country): $remote."
+        for remote in $(cat /app/openvpn/$country-allowed.remotes)
+        do
+            log -v "Allowed remote ($country): $remote."
         done
     fi
 done
+
+if [ "$(var -c vpn.configured)" -ne 0 ]
+then
+    exit 0;
+fi
+
+exit 1;

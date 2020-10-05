@@ -7,7 +7,7 @@ while getopts ":e:c:" arg; do
     esac
 done
 
-log -v openvpn "Provider ipvanish $exec"
+log -v "Provider ipvanish $exec"
 
 case $exec in
 
@@ -29,7 +29,7 @@ case $exec in
 
         if [ -z "$remote" ]
         then
-            log -v openvpn "Could not resolve remote hostname."
+            log -v "Could not resolve remote hostname."
             exit 1;
         fi
 
@@ -46,12 +46,12 @@ case $exec in
         if [ "$country" = "GB" ]
         then
             ipvanishCountry="UK";
-            log -d openvpn "Parsing config files for 'UK' instead of 'GB' since IPVanish differs from ISO 3166-1 alpha-2."
+            log -d "Parsing config files for 'UK' instead of 'GB' since IPVanish differs from ISO 3166-1 alpha-2."
         fi
 
         if [ -z "$(find /cache/openvpn/ipvanish/ -name "*-$ipvanishCountry-*")" ]
         then
-            log -e openvpn "No config files found country $country. Ignoring. "
+            log -e "No config files found country $country. Ignoring. "
             exit 1;
         fi
 
@@ -89,7 +89,7 @@ case $exec in
 
         if [ "$dateCurrent" != "$dateUpdated" ]
         then
-            log -i openvpn "Updating ipvanish configuration files."
+            log -i "Updating ipvanish configuration files."
 
             mkdir -p /cache/openvpn/ipvanish
             rm -f /cache/openvpn/ipvanish/configs.zip
@@ -98,20 +98,20 @@ case $exec in
             
             if [ $? -eq 1 ]
             then
-                log -w openvpn "Download failed. "
+                log -w "Download failed. "
             else
-                log -d openvpn "Unzipping configs."
+                log -d "Unzipping configs."
                 unzip -q -o /cache/openvpn/ipvanish/configs.zip -d /cache/openvpn/ipvanish/
 
                 echo $dateCurrent > /cache/openvpn/ipvanish/date_updated
             fi
         else
-            log -d openvpn "Config recently updated. Skipping..."
+            log -d "Config recently updated. Skipping..."
         fi
 
         if [ ! -f /app/openvpn/ca.ipvanish.com.crt ]
         then
-            log -d openvpn "Copying certificate."
+            log -d "Copying certificate."
             cp -f /cache/openvpn/ipvanish/ca.ipvanish.com.crt /app/openvpn/
         fi
 

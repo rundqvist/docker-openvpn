@@ -1,4 +1,4 @@
-FROM rundqvist/supervisor:1.0
+FROM rundqvist/supervisor:1.0.1
 
 LABEL maintainer="mattias.rundqvist@icloud.com"
 
@@ -14,5 +14,6 @@ ENV VPN_PROVIDER='' \
 	VPN_COUNTRY='' \
 	VPN_INCLUDED_REMOTES='' \
 	VPN_EXCLUDED_REMOTES='' \
+	VPN_REMOTES_FILTER_MODE='' \
 	VPN_RANDOM_REMOTE='' \
 	VPN_KILLSWITCH='true'
