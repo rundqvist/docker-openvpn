@@ -4,6 +4,8 @@ COUNTRY=$1
 TUN=$2
 IP=$5
 
+log -v "on-down.sh country: $COUNTRY, tun: $TUN, ip: $IP"
+
 var -k vpn.$COUNTRY -d fail
 var -k vpn.$COUNTRY -d ip
 

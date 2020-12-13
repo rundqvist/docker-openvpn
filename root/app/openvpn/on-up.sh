@@ -5,6 +5,8 @@ COUNTRY=$1
 TUN=$2
 IP=$5
 
+log -v "on-up.sh country: $COUNTRY, tun: $TUN, ip: $IP"
+
 if [ "$(var VPN_KILLSWITCH)" = "true" ]
 then
     log -d "Removing killswitch config."

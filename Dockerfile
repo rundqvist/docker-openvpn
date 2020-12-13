@@ -4,7 +4,7 @@ LABEL maintainer="mattias.rundqvist@icloud.com"
 
 WORKDIR /app
 
-RUN apk add --update --no-cache openvpn
+RUN apk add --update --no-cache openvpn unrar
 
 COPY root /
 
