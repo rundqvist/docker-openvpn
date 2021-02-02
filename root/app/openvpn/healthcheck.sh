@@ -8,7 +8,7 @@ then
 fi
 
 country=$(var VPN_COUNTRY)
-ip=$(echoip -f https)
+ip=$(echoip -m http -f https)
 rc=$?
 
 #

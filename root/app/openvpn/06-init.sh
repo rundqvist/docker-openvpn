@@ -11,7 +11,7 @@ VPN_EXCLUDED_REMOTES=$(var VPN_EXCLUDED_REMOTES)
 #
 # Store host ip before starting vpn
 #
-publicIp=$(echoip -f https)
+publicIp=$(echoip -m http -f https)
 
 if [ $? -eq 1 ] || [ -z "$publicIp" ]; then
     log -e "Could not resolve public ip."
@@ -87,6 +87,7 @@ then
     do
         iptables -A OUTPUT -d $s -j ACCEPT
     done
+    
 elif [ "$(var VPN_MULTIPLE)" != "true" ]
 then
     log -w "Killswitch disabled."        
