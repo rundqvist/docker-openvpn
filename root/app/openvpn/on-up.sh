@@ -2,11 +2,25 @@
 
 provider=$(var VPN_PROVIDER)
 COUNTRY=$1
-TUN=$2
-IP=$5
+TUN=$dev
+IP=$ifconfig_local
 
 log -v "on-up.sh country: $COUNTRY, tun: $TUN, ip: $IP"
 
+#
+# Do we have an IP?
+#
+if [ -z "$IP" ]
+then
+    log -e "No IP. Forcing reconnect..."
+    exit 1;
+else
+    log -i "Connected. Assigned IP is: $IP."
+fi
+
+#
+# Remove killswitch (if any)
+#
 if [ "$(var VPN_KILLSWITCH)" = "true" ]
 then
     log -d "Removing killswitch config."

@@ -1,8 +1,8 @@
 #!/bin/sh
 
 COUNTRY=$1
-TUN=$2
-IP=$5
+TUN=$dev
+IP=$ifconfig_local
 
 log -v "on-down.sh country: $COUNTRY, tun: $TUN, ip: $IP"
 
