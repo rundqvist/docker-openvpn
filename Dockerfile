@@ -1,4 +1,4 @@
-FROM rundqvist/supervisor:1.0.1
+FROM rundqvist/supervisor:latest
 
 LABEL maintainer="mattias.rundqvist@icloud.com"
 

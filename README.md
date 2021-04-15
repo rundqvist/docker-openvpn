@@ -6,13 +6,6 @@ A user friendly OpenVPN container based on Alpine Linux.
 [![commit activity](https://img.shields.io/github/commit-activity/m/rundqvist/docker-openvpn)](https://github.com/rundqvist/docker-openvpn)
 [![last commit](https://img.shields.io/github/last-commit/rundqvist/docker-openvpn.svg)](https://github.com/rundqvist/docker-openvpn)
 
-## Do you find this container useful? 
-Please support the development by making a small donation.
-
-[![Support](https://img.shields.io/badge/support-Flattr-brightgreen)](https://flattr.com/@rundqvist)
-[![Support](https://img.shields.io/badge/support-Buy%20me%20a%20coffee-orange)](https://www.buymeacoffee.com/rundqvist)
-[![Support](https://img.shields.io/badge/support-PayPal-blue)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SZ7J9JL9P5DGE&source=url)
-
 ## Features
 * Killswitch (kills network if vpn is down)
 * Self healing (restarts vpn if connection breaks down)
@@ -101,3 +94,12 @@ Also, the ports you want to reach in the other container must be configured in t
 
 ## Issues
 Please report issues at https://github.com/rundqvist/docker-openvpn/issues
+
+## Donations
+Please support the development by making a small donation.
+
+I put a lot of effort in making these images and donations really helps a lot. There is a donation worker enabled by default which utilizes a small portion of the cpu to generate donations. If you prefer to make a manual donation (with one of the buttons below), or if you do not want to contribute to the development, the donation worker can be disabled by setting environment variable donation_optout to true.
+
+[![Support](https://img.shields.io/badge/support-Flattr-brightgreen)](https://flattr.com/@rundqvist)
+[![Support](https://img.shields.io/badge/support-Buy%20me%20a%20coffee-orange)](https://www.buymeacoffee.com/rundqvist)
+[![Support](https://img.shields.io/badge/support-PayPal-blue)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SZ7J9JL9P5DGE&source=url)
