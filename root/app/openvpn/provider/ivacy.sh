@@ -98,7 +98,9 @@ case $exec in
                 log -w "Download failed. "
             else
                 log -d "Extract configs."
-                unrar -o+ e /cache/openvpn/ivacy/OpenVPN-Configs-with-certificate.rar /cache/openvpn/ivacy/ >/dev/null
+                bsdtar -xf /cache/openvpn/ivacy/OpenVPN-Configs-with-certificate.rar -C /cache/openvpn/ivacy/
+                mv /cache/openvpn/ivacy/OpenVPN-Configs/* /cache/openvpn/ivacy/
+                rmdir /cache/openvpn/ivacy/OpenVPN-Configs
 
                 echo $dateCurrent > /cache/openvpn/ivacy/date_updated
             fi

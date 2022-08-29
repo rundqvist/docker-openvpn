@@ -94,7 +94,7 @@ case $exec in
             mkdir -p /cache/openvpn/ipvanish
             rm -f /cache/openvpn/ipvanish/configs.zip
 
-            wget -q https://www.ipvanish.com/software/configs/configs.zip -P /cache/openvpn/ipvanish/ 2>/dev/null
+            wget -q https://configs.ipvanish.com/configs/configs.zip -P /cache/openvpn/ipvanish/ 2>/dev/null
             
             if [ $? -eq 1 ]
             then

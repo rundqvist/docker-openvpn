@@ -1,10 +1,10 @@
-FROM rundqvist/supervisor:latest
+FROM rundqvist/supervisor:1.1
 
 LABEL maintainer="mattias.rundqvist@icloud.com"
 
 WORKDIR /app
 
-RUN apk add --update --no-cache openvpn unrar
+RUN apk add --update --no-cache openvpn libarchive-tools iptables
 
 COPY root /
 
