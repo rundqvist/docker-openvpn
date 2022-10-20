@@ -43,6 +43,42 @@ docker run \
   rundqvist/openvpn
 ```
 
+## Compose
+
+```
+version: "3.3"
+
+services:
+  openvpn:
+    image: index.docker.io/rundqvist/openvpn
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    network_mode: bridge
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    environment:
+      - HOST_IP=[your server ip]
+      - VPN_PROVIDER=[your vpn provider]
+      - VPN_USERNAME=[your vpn username]
+      - VPN_PASSWORD=[your vpn password]
+      - VPN_COUNTRY=[your desired country]
+    volumes:
+      - vpncache:/cache
+  openvpntrial:
+    image: [some-other-image]
+    depends_on:
+      - openvpn
+    network_mode: "service:openvpn"
+volumes:
+  vpncache:
+
+```
+
+NOTE: make sure to set `network_mode` to `bridge`, otherwise the DNS settings will not be copied to resolv.conf.
+
 ### Configuration
 
 #### Variables
