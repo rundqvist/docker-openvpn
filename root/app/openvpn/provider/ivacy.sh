@@ -56,10 +56,10 @@ case $exec in
     #
     setup)
 
-        countryName="$(var -k country $country)"
-        log -d "Translating $country to $countryName"
+        #countryName="$(var -k country $country)"
+        #log -d "Translating $country to $countryName"
 
-        if [ -z "$(find /cache/openvpn/ivacy/ -name "$countryName*UDP.ovpn")" ] ; then
+        if [ -z "$(find /cache/openvpn/ivacy/ -name "$country*UDP.ovpn")" ] ; then
             log -e "No config files found country $country. Ignoring. "
             exit 1;
         fi
@@ -67,12 +67,12 @@ case $exec in
         #
         # Copy one config file as template
         #
-        find /cache/openvpn/ivacy/ -name "$countryName*UDP.ovpn" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config-$country.ovpn
+        find /cache/openvpn/ivacy/ -name "$country*UDP.ovpn" -print | head -1 | xargs -I '{}' cp {} /app/openvpn/config-$country.ovpn
 
         #
         # Resolve remotes
         #
-        find /cache/openvpn/ivacy/ -name "$countryName*UDP.ovpn" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/$country-allowed.remotes
+        find /cache/openvpn/ivacy/ -name "$country*UDP.ovpn" -exec sed -n -e 's/^remote \(.*\) \(.*\)/\1/p' {} \; | sort > /app/openvpn/$country-allowed.remotes
 
     ;;
 
@@ -98,10 +98,7 @@ case $exec in
                 log -w "Download failed. "
             else
                 log -d "Extract configs."
-                bsdtar -xf /cache/openvpn/ivacy/OpenVPN-Configs-with-certificate.rar -C /cache/openvpn/ivacy/
-                mv /cache/openvpn/ivacy/OpenVPN-Configs/* /cache/openvpn/ivacy/
-                rmdir /cache/openvpn/ivacy/OpenVPN-Configs
-
+                bsdtar -xf /cache/openvpn/ivacy/OpenVPN-Configs-with-certificate.rar --strip-components=1 -C /cache/openvpn/ivacy/
                 echo $dateCurrent > /cache/openvpn/ivacy/date_updated
             fi
         else
